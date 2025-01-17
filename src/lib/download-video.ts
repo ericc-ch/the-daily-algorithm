@@ -1,9 +1,10 @@
 import { consola } from "consola"
 import spawn from "nano-spawn"
 import { existsSync } from "node:fs"
+import { join } from "node:path"
 
 import { CacheManager } from "./cache-manager"
-import { createTempDir } from "./temp"
+import { PATHS } from "./paths"
 
 interface DownloadOptions {
   url: string
@@ -41,8 +42,8 @@ export async function downloadVideo({
   }
 
   consola.info(`Downloading video from: ${url}`)
-  const outputDir = await createTempDir("video-download-")
-  consola.debug(`Created temp directory: ${outputDir}`)
+  const outputDir = join(PATHS.CACHE_DIR, "videos")
+  consola.debug(`Using cache directory: ${outputDir}`)
 
   const { output } = await spawn("yt-dlp", [
     // Specify the directory to save the downloaded files
