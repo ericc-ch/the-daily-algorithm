@@ -2,7 +2,8 @@ import { existsSync } from "node:fs"
 import { readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 
-import { cleanupTempDir, createTempDir } from "./temp"
+import { clearCache, ensureCacheDir } from "./cache"
+import { PATHS } from "./paths"
 
 interface CacheOptions {
   ttl?: number // Time to live in milliseconds
@@ -14,26 +15,24 @@ interface CacheEntry {
 }
 
 export class CacheManager {
-  private cacheDir: string | undefined
-  private cacheFile: string | undefined
+  private cacheFile: string
   private cache = new Map<string, CacheEntry>()
 
   constructor(
     private readonly prefix: string,
     private readonly options: CacheOptions = {},
-  ) {}
+  ) {
+    this.cacheFile = join(PATHS.CACHE_DIR, `${prefix}-cache.json`)
+  }
 
   private async ensureCacheDir(): Promise<string> {
-    if (!this.cacheDir) {
-      this.cacheDir = await createTempDir(`${this.prefix}-cache-`)
-      this.cacheFile = join(this.cacheDir, "cache.json")
-      await this.loadCache()
-    }
-    return this.cacheDir
+    await ensureCacheDir()
+    await this.loadCache()
+    return PATHS.CACHE_DIR
   }
 
   private async loadCache(): Promise<void> {
-    if (this.cacheFile === undefined || !existsSync(this.cacheFile)) return
+    if (!existsSync(this.cacheFile)) return
 
     try {
       const fileContent = await readFile(this.cacheFile, "utf-8")
@@ -64,8 +63,6 @@ export class CacheManager {
   }
 
   private async saveCache(): Promise<void> {
-    if (this.cacheFile === undefined) return
-
     try {
       const data = Object.fromEntries(this.cache.entries())
       await writeFile(this.cacheFile, JSON.stringify(data), "utf-8")
@@ -101,10 +98,7 @@ export class CacheManager {
   }
 
   async cleanup(): Promise<void> {
-    if (this.cacheDir !== undefined) {
-      await cleanupTempDir(this.cacheDir)
-      this.cacheDir = undefined
-      this.cacheFile = undefined
-    }
+    await clearCache()
+    this.cache.clear()
   }
 }
