@@ -39,13 +39,26 @@ export async function downloadVideo({
   const outputDir = await createTempDir("video-download-")
 
   const { output } = await spawn("yt-dlp", [
+    // Specify the directory to save the downloaded files
     "--paths",
     outputDir,
+
+    // Set the output filename template
     "--output",
+    // Use UUID for filename, %(ext)s is replaced with file extension
     `${globalThis.crypto.randomUUID()}.%(ext)s`,
+
+    // Download in MP4 format
     "--format",
     "mp4",
-    ...(withMusic ? ["-x"] : []),
+
+    // If withMusic is true, add -x flag
+    ...(withMusic ?
+      // -x extracts audio from video
+      ["-x"]
+    : []),
+
+    // The video URL to download
     url,
   ])
 
