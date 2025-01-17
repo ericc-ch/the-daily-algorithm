@@ -2,7 +2,8 @@
   "name": "the-daily-algorithm",
   "type": "module",
   "scripts": {
-    "lint": "eslint . --cache"
+    "lint": "eslint . --cache",
+    "migration:generate": "pnpx drizzle-kit generate"
   },
   "dependencies": {
     "@echristian/env": "^0.0.6",

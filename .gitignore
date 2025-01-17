@@ -176,3 +176,6 @@ dist
 
 # Aider
 .aider*
+
+# Drizzle ORM
+.drizzle
