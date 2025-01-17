@@ -2,7 +2,7 @@ import { existsSync } from "node:fs"
 import { readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 
-import { createTempDir } from "./temp"
+import { cleanupTempDir, createTempDir } from "./temp"
 
 interface CacheOptions {
   ttl?: number // Time to live in milliseconds
@@ -14,8 +14,8 @@ interface CacheEntry {
 }
 
 export class CacheManager {
-  private cacheDir: string | null = null
-  private cacheFile: string | null = null
+  private cacheDir: string | undefined
+  private cacheFile: string | undefined
   private cache = new Map<string, CacheEntry>()
 
   constructor(
@@ -33,7 +33,7 @@ export class CacheManager {
   }
 
   private async loadCache(): Promise<void> {
-    if (!this.cacheFile || !existsSync(this.cacheFile)) return
+    if (this.cacheFile === undefined || !existsSync(this.cacheFile)) return
 
     try {
       const fileContent = await readFile(this.cacheFile, "utf-8")
@@ -64,7 +64,7 @@ export class CacheManager {
   }
 
   private async saveCache(): Promise<void> {
-    if (!this.cacheFile) return
+    if (this.cacheFile === undefined) return
 
     try {
       const data = Object.fromEntries(this.cache.entries())
@@ -98,5 +98,13 @@ export class CacheManager {
       data: value,
     })
     await this.saveCache()
+  }
+
+  async cleanup(): Promise<void> {
+    if (this.cacheDir !== undefined) {
+      await cleanupTempDir(this.cacheDir)
+      this.cacheDir = undefined
+      this.cacheFile = undefined
+    }
   }
 }
