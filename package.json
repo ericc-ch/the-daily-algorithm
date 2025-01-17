@@ -12,6 +12,7 @@
     "@echristian/env": "^0.0.6",
     "@google/generative-ai": "^0.21.0",
     "citty": "^0.1.6",
+    "consola": "^3.4.0",
     "drizzle-orm": "^0.38.4",
     "nano-spawn": "^0.2.0",
     "pathe": "^2.0.2",

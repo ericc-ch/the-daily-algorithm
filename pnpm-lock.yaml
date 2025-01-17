@@ -17,6 +17,9 @@ importers:
       citty:
         specifier: ^0.1.6
         version: 0.1.6
+      consola:
+        specifier: ^3.4.0
+        version: 3.4.0
       drizzle-orm:
         specifier: ^0.38.4
         version: 0.38.4(bun-types@1.1.44)
