@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "lib": ["es2015", "DOM"],
+    "target": "ES2018",
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+
+    "composite": true,
+    "incremental": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    "baseUrl": "./",
+    "paths": {
+      "~/*": ["./src/*"]
+    }
+  },
+  "include": ["./src/modules/video-generator"]
+}

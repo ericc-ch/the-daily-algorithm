@@ -20,7 +20,7 @@ export class CacheManager {
   private cache = new Map<string, CacheEntry>()
 
   constructor(
-    private readonly prefix: string,
+    prefix: string,
     private readonly options: CacheOptions = {},
   ) {
     this.cacheFile = join(PATHS.CACHE_DIR, `${prefix}-cache.json`)
