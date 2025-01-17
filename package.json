@@ -1,7 +1,9 @@
 {
   "name": "the-daily-algorithm",
   "type": "module",
-  "module": "src/main.ts",
+  "scripts": {
+    "lint": "eslint . --cache"
+  },
   "dependencies": {
     "@echristian/env": "^0.0.6",
     "@google/generative-ai": "^0.21.0",
