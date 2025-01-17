@@ -3,7 +3,7 @@ import type { FileMetadataResponse } from "@google/generative-ai/server"
 import { model } from "./lib/model"
 import { PROMPTS } from "./lib/prompts"
 
-export async function generateCrackBotReaction(
+export async function generateScript(
   video: FileMetadataResponse,
 ): Promise<string> {
   const session = model.startChat({
