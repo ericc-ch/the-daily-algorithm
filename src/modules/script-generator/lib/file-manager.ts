@@ -3,7 +3,7 @@ import {
   GoogleAIFileManager,
   type FileMetadataResponse,
 } from "@google/generative-ai/server"
-import consola from "consola"
+import { consola } from "consola"
 
 import { ENV } from "~/lib/env"
 import { sleep } from "~/lib/sleep"

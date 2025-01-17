@@ -1,3 +1,4 @@
+import { consola } from "consola"
 import spawn from "nano-spawn"
 import { existsSync } from "node:fs"
 
@@ -6,7 +7,7 @@ import { createTempDir } from "./temp"
 
 interface DownloadOptions {
   url: string
-  withMusic?: boolean
+  musicOnly?: boolean
   useCache?: boolean
 }
 
@@ -20,40 +21,45 @@ const videoCache = new CacheManager("video", {
 
 export async function downloadVideo({
   url,
-  withMusic = true,
+  musicOnly = false,
   useCache = true,
 }: DownloadOptions): Promise<string> {
-  const cacheKey = `${url}-${withMusic ? "music" : "video"}`
+  const cacheKey = `${url}-${musicOnly ? "music" : "video"}`
 
   // Check cache if enabled
   if (useCache) {
+    consola.debug(`Checking cache for key: ${cacheKey}`)
     const cached = await videoCache.get(cacheKey)
     if (cached) {
       const videoCacheData = JSON.parse(cached) as VideoCache
       if (existsSync(videoCacheData.path)) {
+        consola.success(`Found cached video at: ${videoCacheData.path}`)
         return videoCacheData.path
       }
+      consola.warn(`Cached file not found at: ${videoCacheData.path}`)
     }
   }
 
+  consola.info(`Downloading video from: ${url}`)
   const outputDir = await createTempDir("video-download-")
+  consola.debug(`Created temp directory: ${outputDir}`)
 
   const { output } = await spawn("yt-dlp", [
     // Specify the directory to save the downloaded files
     "--paths",
     outputDir,
 
-    // Set the output filename template
+    // Set the output filename template - use deterministic name based on URL
     "--output",
-    // Use UUID for filename, %(ext)s is replaced with file extension
-    `${globalThis.crypto.randomUUID()}.%(ext)s`,
+    // Use URL hash and music flag for filename, %(ext)s is replaced with file extension
+    `${btoa(cacheKey)}.%(ext)s`,
 
     // Download in MP4 format
     "--format",
     "mp4",
 
     // If withMusic is true, add -x flag
-    ...(withMusic ?
+    ...(musicOnly ?
       // -x extracts audio from video
       ["-x"]
     : []),
@@ -65,6 +71,7 @@ export async function downloadVideo({
   const downloadLine = output.split("[download]").map((line) => line.trim())[1]
   const location = downloadLine.split("Destination: ")[1]
 
+  consola.success(`Video downloaded successfully to: ${location}`)
   await videoCache.set(cacheKey, JSON.stringify({ path: location }))
 
   return location

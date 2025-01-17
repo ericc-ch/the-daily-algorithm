@@ -1,3 +1,4 @@
+import { consola } from "consola"
 import { existsSync } from "node:fs"
 import { readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
@@ -58,7 +59,7 @@ export class CacheManager {
         this.cache = new Map(entries)
       }
     } catch (error) {
-      console.warn("Failed to load cache:", error)
+      consola.warn("Failed to load cache:", error)
     }
   }
 
@@ -67,7 +68,7 @@ export class CacheManager {
       const data = Object.fromEntries(this.cache.entries())
       await writeFile(this.cacheFile, JSON.stringify(data), "utf-8")
     } catch (error) {
-      console.warn("Failed to save cache:", error)
+      consola.warn("Failed to save cache:", error)
     }
   }
 
@@ -81,15 +82,18 @@ export class CacheManager {
     const entry = this.cache.get(key)
 
     if (!entry || this.isExpired(entry)) {
+      consola.debug(`Cache miss for key: ${key}`)
       this.cache.delete(key)
       return null
     }
 
+    consola.debug(`Cache hit for key: ${key}`)
     return entry.data
   }
 
   async set(key: string, value: string): Promise<void> {
     await this.ensureCacheDir()
+    consola.debug(`Setting cache for key: ${key}`)
     this.cache.set(key, {
       timestamp: Date.now(),
       data: value,
@@ -98,6 +102,7 @@ export class CacheManager {
   }
 
   async cleanup(): Promise<void> {
+    consola.info("Cleaning up cache")
     await clearCache()
     this.cache.clear()
   }
