@@ -8,7 +8,6 @@ interface DownloadOptions {
   url: string
   withMusic?: boolean
   useCache?: boolean
-  cacheTTL?: number // Time to live in milliseconds
 }
 
 interface VideoCache {
@@ -21,7 +20,7 @@ const videoCache = new CacheManager("video", {
 
 export async function downloadVideo({
   url,
-  withMusic = false,
+  withMusic = true,
   useCache = true,
 }: DownloadOptions): Promise<string> {
   const cacheKey = `${url}-${withMusic ? "music" : "video"}`
@@ -53,10 +52,7 @@ export async function downloadVideo({
   const downloadLine = output.split("[download]").map((line) => line.trim())[1]
   const location = downloadLine.split("Destination: ")[1]
 
-  // Update cache if enabled
-  if (useCache) {
-    await videoCache.set(cacheKey, JSON.stringify({ path: location }))
-  }
+  await videoCache.set(cacheKey, JSON.stringify({ path: location }))
 
   return location
 }
