@@ -8,9 +8,13 @@ const APP_DIR = path.join(
   "the-daily-algorithm",
 )
 
+const CACHE_DIR = path.join(os.homedir(), ".cache", "the-daily-algorithm")
+
 const DB_PATH = path.join(APP_DIR, "db.sqlite")
 
 export const PATHS = {
   APP_DIR,
   DB_PATH,
+
+  CACHE_DIR,
 }
