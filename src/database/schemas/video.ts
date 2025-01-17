@@ -3,10 +3,10 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
 export const video = sqliteTable("video", {
   id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
 
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  script: text("script").notNull(),
-  source_url: text("source_url").notNull(),
+  title: text("title"),
+  description: text("description"),
+  script: text("script"),
+  source_url: text("source_url"),
 
   status: text("status", {
     enum: [
