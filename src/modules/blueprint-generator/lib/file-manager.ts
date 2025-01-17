@@ -35,7 +35,7 @@ export class GoogleFileManager {
 
   async uploadBlob(blob: Blob, { mimeType }: UploadOptions) {
     const tempDir = await this.ensureTempDir()
-    consola.info(`Uploading blob: ${blob.size} bytes`)
+    consola.start(`Uploading blob: ${blob.size} bytes`)
 
     const tempFile = await createTempFile(
       await blob.text(),
@@ -55,7 +55,7 @@ export class GoogleFileManager {
   }
 
   async uploadFile(path: string, { mimeType }: UploadOptions) {
-    consola.info(`Uploading file: ${path}`)
+    consola.start(`Uploading file: ${path}`)
     const response = await this.fileManager.uploadFile(path, {
       mimeType,
     })
@@ -64,7 +64,7 @@ export class GoogleFileManager {
   }
 
   async deleteAllFiles(): Promise<void> {
-    consola.info("Deleting all uploaded files")
+    consola.start("Deleting all uploaded files")
     const fileList = await this.fileManager.listFiles()
 
     const deletePromises = fileList.files.map((file) =>
@@ -79,7 +79,7 @@ export class GoogleFileManager {
     file: FileMetadataResponse,
     pollInterval = 1000,
   ): Promise<void> {
-    consola.info(`Waiting for file processing: ${file.name}`)
+    consola.start(`Waiting for file processing: ${file.name}`)
 
     let currentFile = file
     while (currentFile.state === FileState.PROCESSING) {
