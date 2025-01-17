@@ -1,51 +1,24 @@
-import type { GenerationConfig, StartChatParams } from "@google/generative-ai"
 import type { FileMetadataResponse } from "@google/generative-ai/server"
 
 import { model } from "./lib/model"
+import { PROMPTS } from "./lib/prompts"
 
-const GEMINI_CONFIG = {
-  generation: {
-    temperature: 2,
-  } as const satisfies GenerationConfig,
-} as const
-
-type MessageContent = Array<{
-  fileData: {
-    fileUri: string
-    mimeType: string
-  }
-}>
-
-const createChatSession = (
-  params?: Omit<StartChatParams, "generationConfig">,
-) =>
-  model.startChat({
-    generationConfig: GEMINI_CONFIG.generation,
-    ...params,
+export async function generateCrackBotReaction(
+  video: FileMetadataResponse,
+): Promise<string> {
+  const session = model.startChat({
+    generationConfig: { temperature: 2 },
   })
 
-interface GenerateReactionOptions {
-  file: FileMetadataResponse
-}
-
-export async function generateCrackBotReaction({
-  file,
-}: GenerateReactionOptions): Promise<string> {
-  const session = createChatSession()
-
-  const messageContent: MessageContent = [
+  const reply = await session.sendMessage([
     {
       fileData: {
-        fileUri: file.uri,
-        mimeType: file.mimeType,
+        fileUri: video.uri,
+        mimeType: video.mimeType,
       },
     },
-  ]
+    PROMPTS.USER_PROMPT,
+  ])
 
-  try {
-    const reply = await session.sendMessage(messageContent)
-    return reply.response.text()
-  } catch (error) {
-    throw new Error("")
-  }
+  return reply.response.text()
 }
