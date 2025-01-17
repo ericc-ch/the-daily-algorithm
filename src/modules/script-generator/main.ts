@@ -1,15 +1,20 @@
 import type { FileMetadataResponse } from "@google/generative-ai/server"
 
+import { consola } from "consola"
+
 import { model } from "./lib/model"
 import { PROMPTS } from "./lib/prompts"
 
 export async function generateScript(
   video: FileMetadataResponse,
 ): Promise<string> {
+  consola.info("Starting script generation for video", video.uri)
+
   const session = model.startChat({
     generationConfig: { temperature: 2 },
   })
 
+  consola.debug("Sending prompt to model")
   const reply = await session.sendMessage([
     {
       fileData: {
@@ -20,5 +25,8 @@ export async function generateScript(
     PROMPTS.USER_PROMPT,
   ])
 
-  return reply.response.text()
+  const script = reply.response.text()
+  consola.success("Script generated successfully")
+
+  return script
 }
