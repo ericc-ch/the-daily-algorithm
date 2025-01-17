@@ -1,6 +1,6 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { join } from "pathe"
 
 /**
  * Creates a temporary directory with a unique name in the OS temp directory

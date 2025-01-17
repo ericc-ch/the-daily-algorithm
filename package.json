@@ -2,9 +2,11 @@
   "name": "the-daily-algorithm",
   "type": "module",
   "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "knip": "knip",
     "lint": "eslint . --cache",
     "migration:generate": "pnpx drizzle-kit generate",
-    "stub": "tsx src/modules/video-finder/main.ts"
+    "start": "tsx src/main.ts"
   },
   "dependencies": {
     "@echristian/env": "^0.0.6",
@@ -12,7 +14,7 @@
     "citty": "^0.1.6",
     "drizzle-orm": "^0.38.4",
     "nano-spawn": "^0.2.0",
-    "pathe": "^2.0.1",
+    "pathe": "^2.0.2",
     "playwright": "^1.49.1",
     "std-env": "^3.8.0"
   },
@@ -21,8 +23,9 @@
     "@types/node": "^22.10.7",
     "drizzle-kit": "^0.30.2",
     "eslint": "^9.18.0",
+    "knip": "^5.42.2",
     "tsx": "^4.19.2",
     "vitest": "^3.0.1"
   },
-  "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b"
+  "packageManager": "pnpm@10.0.0"
 }
