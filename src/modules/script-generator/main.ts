@@ -11,7 +11,7 @@ export async function generateScript(
   consola.info("Starting script generation for video", video.uri)
 
   const session = model.startChat({
-    generationConfig: { temperature: 2 },
+    generationConfig: { temperature: 1.5 },
   })
 
   consola.debug("Sending prompt to model")

@@ -90,7 +90,7 @@ export class GoogleFileManager {
   async waitForFileProcessing(
     file: FileMetadataResponse,
     pollInterval = 1000,
-  ): Promise<void> {
+  ): Promise<FileMetadataResponse> {
     consola.start(`Processing file: ${file.name}`)
     let currentFile = file
     let attempts = 0
@@ -115,6 +115,7 @@ export class GoogleFileManager {
     }
 
     consola.success(`Successfully processed file: ${file.name}`)
+    return currentFile
   }
 
   async cleanup(): Promise<void> {
