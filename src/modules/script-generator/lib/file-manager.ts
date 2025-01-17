@@ -35,7 +35,7 @@ export class GoogleFileManager {
 
   async uploadBlob(blob: Blob, { mimeType }: UploadOptions) {
     const tempDir = await this.ensureTempDir()
-    consola.start(`Uploading blob: ${blob.size} bytes`)
+    consola.start(`Uploading blob of size: ${(blob.size / 1024).toFixed(2)} KB`)
 
     const tempFile = await createTempFile(
       await blob.text(),
@@ -55,7 +55,7 @@ export class GoogleFileManager {
   }
 
   async uploadFile(path: string, { mimeType }: UploadOptions) {
-    consola.start(`Uploading file: ${path}`)
+    consola.info(`Starting file upload: ${path}`)
     const response = await this.fileManager.uploadFile(path, {
       mimeType,
     })
@@ -64,34 +64,57 @@ export class GoogleFileManager {
   }
 
   async deleteAllFiles(): Promise<void> {
-    consola.start("Deleting all uploaded files")
+    consola.start("Cleaning up uploaded files")
     const fileList = await this.fileManager.listFiles()
+    const totalFiles = fileList.files.length
 
-    const deletePromises = fileList.files.map((file) =>
-      this.fileManager.deleteFile(file.name),
+    if (totalFiles === 0) {
+      consola.info("No files to delete")
+      return
+    }
+
+    consola.info(`Found ${totalFiles} file(s) to delete`)
+    const results = await Promise.allSettled(
+      fileList.files.map((file) => this.fileManager.deleteFile(file.name)),
     )
 
-    await Promise.allSettled(deletePromises)
-    consola.success("Deleted all uploaded files")
+    const succeeded = results.filter((r) => r.status === "fulfilled").length
+    const failed = results.filter((r) => r.status === "rejected").length
+
+    if (failed > 0) {
+      consola.warn(`Failed to delete ${failed} file(s)`)
+    }
+    consola.success(`Successfully deleted ${succeeded} file(s)`)
   }
 
   async waitForFileProcessing(
     file: FileMetadataResponse,
     pollInterval = 1000,
   ): Promise<void> {
-    consola.start(`Waiting for file processing: ${file.name}`)
-
+    consola.start(`Processing file: ${file.name}`)
     let currentFile = file
+    let attempts = 0
+    const maxAttempts = 30 // 30 seconds with 1s poll interval by default
+
     while (currentFile.state === FileState.PROCESSING) {
+      attempts++
+      consola.debug(`Processing attempt ${attempts}/${maxAttempts}...`)
+
+      if (attempts >= maxAttempts) {
+        throw new Error(`Timeout waiting for file processing: ${file.name}`)
+      }
+
       await sleep(pollInterval)
       currentFile = await this.fileManager.getFile(file.name)
     }
 
     if (currentFile.state !== FileState.ACTIVE) {
-      throw new Error(`Failed processing file: ${file.name}`)
+      throw new Error(
+        `File processing failed: ${file.name} (State: ${currentFile.state})`,
+      )
     }
 
-    consola.success(`File processed: ${file.name}`)
+    consola.success(`Successfully processed file: ${file.name}`)
   }
 
   async cleanup(): Promise<void> {

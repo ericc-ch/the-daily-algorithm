@@ -2,11 +2,11 @@
   "name": "the-daily-algorithm",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "bun --hot ./src/main.ts",
     "knip": "knip",
     "lint": "eslint . --cache",
-    "migration:generate": "pnpx drizzle-kit generate",
-    "start": "tsx src/main.ts"
+    "migration:generate": "npx drizzle-kit generate",
+    "start": "bun run ./src/main.ts"
   },
   "dependencies": {
     "@echristian/env": "^0.0.6",
@@ -21,12 +21,10 @@
   },
   "devDependencies": {
     "@echristian/eslint-config": "^0.0.16",
-    "@types/node": "^22.10.7",
+    "@types/bun": "^1.1.17",
     "drizzle-kit": "^0.30.2",
     "eslint": "^9.18.0",
     "knip": "^5.42.2",
-    "tsx": "^4.19.2",
     "vitest": "^3.0.1"
-  },
-  "packageManager": "pnpm@10.0.0"
+  }
 }

@@ -47,7 +47,7 @@ interface BrowserPage {
 
 interface BrowserState {
   browser: playwright.Browser | undefined
-  idleTimer: NodeJS.Timeout | undefined
+  idleTimer: Timer | undefined
   closePromise: Promise<void> | undefined
 }
 
