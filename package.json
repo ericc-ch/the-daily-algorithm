@@ -8,6 +8,7 @@
     "@echristian/env": "^0.0.6",
     "@google/generative-ai": "^0.21.0",
     "citty": "^0.1.6",
+    "pathe": "^2.0.1",
     "std-env": "^3.8.0"
   },
   "devDependencies": {
