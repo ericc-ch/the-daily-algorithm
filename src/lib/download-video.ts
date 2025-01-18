@@ -1,6 +1,6 @@
 import { consola } from "consola"
 import spawn from "nano-spawn"
-import { existsSync } from "node:fs"
+import { access } from "node:fs/promises"
 import { join } from "node:path"
 
 import { CacheManager } from "./cache-manager"
@@ -33,11 +33,13 @@ export async function downloadVideo({
     const cached = await videoCache.get(cacheKey)
     if (cached) {
       const videoCacheData = JSON.parse(cached) as VideoCache
-      if (existsSync(videoCacheData.path)) {
+      try {
+        await access(videoCacheData.path)
         consola.success(`Found cached video at: ${videoCacheData.path}`)
         return videoCacheData.path
+      } catch {
+        consola.warn(`Cached file not found at: ${videoCacheData.path}`)
       }
-      consola.warn(`Cached file not found at: ${videoCacheData.path}`)
     }
   }
 

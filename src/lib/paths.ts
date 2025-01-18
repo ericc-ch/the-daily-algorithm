@@ -1,5 +1,6 @@
 import os from "node:os"
 import path from "pathe"
+import fs from "node:fs/promises"
 
 const APP_DIR = path.join(
   os.homedir(),
@@ -19,6 +20,14 @@ export const PATHS = {
   CACHE_DIR,
   REMOTION_PUBLIC_DIR,
   REMOTION_OUTPUT_DIR,
-
   DB_PATH,
+}
+
+export async function ensureDirectories(): Promise<void> {
+  await Promise.all([
+    fs.mkdir(APP_DIR, { recursive: true }),
+    fs.mkdir(CACHE_DIR, { recursive: true }),
+    fs.mkdir(REMOTION_PUBLIC_DIR, { recursive: true }),
+    fs.mkdir(REMOTION_OUTPUT_DIR, { recursive: true }),
+  ])
 }

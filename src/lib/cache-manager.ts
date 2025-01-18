@@ -1,6 +1,5 @@
 import { consola } from "consola"
-import { existsSync } from "node:fs"
-import { readFile, writeFile } from "node:fs/promises"
+import { readFile, writeFile, access } from "node:fs/promises"
 import { join } from "node:path"
 
 import { clearCache, ensureCacheDir } from "./cache"
@@ -33,7 +32,11 @@ export class CacheManager {
   }
 
   private async loadCache(): Promise<void> {
-    if (!existsSync(this.cacheFile)) return
+    try {
+      await access(this.cacheFile)
+    } catch {
+      return
+    }
 
     try {
       const fileContent = await readFile(this.cacheFile, "utf-8")
