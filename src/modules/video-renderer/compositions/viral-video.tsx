@@ -1,4 +1,11 @@
-import { AbsoluteFill, Audio, Sequence } from "remotion"
+import {
+  AbsoluteFill,
+  Audio,
+  OffthreadVideo,
+  Sequence,
+  staticFile,
+  useVideoConfig,
+} from "remotion"
 import { z } from "zod"
 
 import { Subtitle } from "../components/subtitle"
@@ -16,8 +23,7 @@ export const viralVideoSchema = z.object({
 
   subtitles: z.array(subtitleCueSchema),
 
-  durationInFrames: z.number().int(),
-  durationInMs: z.number().int(),
+  audioLength: z.number().int(),
 })
 
 export type ViralVideoProps = z.infer<typeof viralVideoSchema>
@@ -26,24 +32,36 @@ export function ViralVideo({
   audioSrc,
   videoSrc,
   subtitles,
-  durationInFrames,
-  durationInMs,
+  audioLength,
 }: ViralVideoProps) {
-  return (
-    <AbsoluteFill style={{ backgroundColor: "white" }}>
-      <Audio src={audioSrc} />
+  const { fps } = useVideoConfig()
 
-      <AbsoluteFill style={{ top: "65%" }}>
-        {subtitles.map((subtitle, index) => (
-          <Sequence
-            key={index}
-            durationInFrames={subtitle.duration / durationInFrames}
-            from={subtitle.start / durationInFrames}
-          >
-            <Subtitle text={subtitle.text} />
-          </Sequence>
-        ))}
-      </AbsoluteFill>
+  const msToFrames = (ms: number) => Math.floor((ms / 1000) * fps)
+
+  const staticAudio = staticFile(audioSrc)
+  const staticVideo = staticFile(videoSrc)
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: "black" }}>
+      <Audio src={staticAudio} />
+
+      <Sequence durationInFrames={audioLength}>
+        <OffthreadVideo muted playbackRate={0.2} src={staticVideo} />
+      </Sequence>
+
+      <Sequence from={audioLength + 1}>
+        <OffthreadVideo src={staticVideo} />
+      </Sequence>
+
+      {subtitles.map((subtitle, index) => (
+        <Sequence
+          key={index}
+          durationInFrames={msToFrames(subtitle.duration)}
+          from={msToFrames(subtitle.start)}
+        >
+          <Subtitle text={subtitle.text} />
+        </Sequence>
+      ))}
     </AbsoluteFill>
   )
 }

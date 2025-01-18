@@ -1,32 +1,47 @@
-import { AbsoluteFill, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { loadFont } from "@remotion/google-fonts/Montserrat"
+import { fitText } from "@remotion/layout-utils"
+import { AbsoluteFill, useVideoConfig } from "remotion"
 
-import { Word } from "./word"
+const { fontFamily } = loadFont()
 
 interface Props {
   text: string
 }
 
 export function Subtitle({ text }: Props) {
-  const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
+  const { width } = useVideoConfig()
+  const desiredFontSize = 80
 
-  const enter = spring({
-    config: {
-      damping: 200,
-    },
-    durationInFrames: 5,
-    fps,
-    frame,
+  const fittedText = fitText({
+    fontFamily,
+    text,
+    withinWidth: width * 0.75,
   })
 
+  const fontSize = Math.min(desiredFontSize, fittedText.fontSize)
+
   return (
-    <AbsoluteFill>
-      <AbsoluteFill>
-        <Word stroke enterProgress={enter} text={text} />
-      </AbsoluteFill>
-      <AbsoluteFill>
-        <Word enterProgress={enter} stroke={false} text={text} />
-      </AbsoluteFill>
+    <AbsoluteFill style={{ display: "grid", placeContent: "center" }}>
+      <div
+        style={{
+          fontFamily,
+          fontSize,
+          fontWeight: "bold",
+
+          width: "max-content",
+
+          backgroundColor: "#1f1f1f",
+          color: "#EBEBEB",
+
+          textAlign: "center",
+          textTransform: "uppercase",
+
+          paddingBlock: 4,
+          paddingInline: 16,
+        }}
+      >
+        {text}
+      </div>
     </AbsoluteFill>
   )
 }

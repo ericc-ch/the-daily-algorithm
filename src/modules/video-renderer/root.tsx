@@ -1,7 +1,5 @@
-import { getVideoMetadata } from "@remotion/media-utils"
+import { getAudioData, getVideoMetadata } from "@remotion/media-utils"
 import { Composition, staticFile } from "remotion"
-
-import { PATHS } from "~/lib/paths"
 
 import { ViralVideo, viralVideoSchema } from "./compositions/viral-video"
 
@@ -11,34 +9,42 @@ export function Root() {
   return (
     <Composition
       calculateMetadata={async ({ props }) => {
-        const videoMetadata = await getVideoMetadata(props.videoSrc)
+        const videoMetadata = await getVideoMetadata(staticFile(props.videoSrc))
         const videoDurationInFrames = videoMetadata.durationInSeconds * FPS
 
+        const audioMetadata = await getAudioData(staticFile(props.audioSrc))
+
         const durationInFrames = Math.ceil(videoDurationInFrames)
-        const durationInMs = (durationInFrames / FPS) * 1000
 
         return {
           props: {
             ...props,
-            durationInFrames,
-            durationInMs,
+            audioLength: audioMetadata.durationInSeconds * FPS,
           },
           durationInFrames,
         }
       }}
       component={ViralVideo}
       defaultProps={{
-        audioSrc: staticFile(PATHS.AUDIO_FILE_NAME),
-        videoSrc: staticFile(PATHS.VIDEO_FILE_NAME),
-        durationInMs: 0,
-        durationInFrames: 0,
-        subtitles: [],
+        audioLength: 0,
+        audioSrc: "audio.mp3",
+        videoSrc: "video.mp4",
+        subtitles: [
+          {
+            text: "These knock-knock jokes",
+            start: 100,
+            duration: 1162,
+            end: 1262,
+          },
+          { text: "are in another", start: 1275, duration: 674, end: 1949 },
+          { text: "language", start: 1962, duration: 612, end: 2574 },
+        ],
       }}
       fps={FPS}
-      height={1080}
+      height={1920}
       id="viral-video"
       schema={viralVideoSchema}
-      width={1920}
+      width={1080}
     />
   )
 }

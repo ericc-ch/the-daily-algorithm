@@ -22,7 +22,6 @@ export async function renderVideo() {
     entryPoint,
     publicDir: PATHS.REMOTION_PUBLIC_DIR,
     onProgress: (progress) => {
-      if (progress % 10 !== 0) return
       consola.info(`Bundle progress: ${progress}%`)
     },
     webpackOverride: (config) => ({
@@ -38,6 +37,8 @@ export async function renderVideo() {
   })
 
   const inputProps: Partial<ViralVideoProps> = {
+    audioSrc: PATHS.AUDIO_FILE_NAME,
+    videoSrc: PATHS.VIDEO_FILE_NAME,
     subtitles,
   }
 
@@ -54,13 +55,18 @@ export async function renderVideo() {
 
     codec: "h264",
     inputProps,
-    concurrency: os.cpus().length - 1,
+    concurrency: os.cpus().length,
     hardwareAcceleration: "if-possible",
     x264Preset: "veryfast",
 
     chromeMode: "chrome-for-testing",
     chromiumOptions: {
       gl: "vulkan",
+    },
+
+    onProgress: ({ progress }) => {
+      const intProgress = Math.round(progress * 100)
+      consola.info(`Render progress: ${intProgress}%`)
     },
   })
 

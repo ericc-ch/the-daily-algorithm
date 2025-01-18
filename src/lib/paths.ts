@@ -18,7 +18,7 @@ const REMOTION_PUBLIC_DIR = path.join(APP_DIR, "remotion", "public")
 const AUDIO_FILE_NAME = "audio.mp3"
 const AUDIO_PATH = path.join(REMOTION_PUBLIC_DIR, AUDIO_FILE_NAME)
 
-const SUBTITLE_FILE_NAME = "subtitle.json"
+const SUBTITLE_FILE_NAME = "subtitles.json"
 const SUBTITLE_PATH = path.join(REMOTION_PUBLIC_DIR, SUBTITLE_FILE_NAME)
 
 const VIDEO_FILE_NAME = "video.mp4"

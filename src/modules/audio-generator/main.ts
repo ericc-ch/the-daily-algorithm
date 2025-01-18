@@ -7,6 +7,10 @@ export async function generateAudio(script: string) {
   try {
     const audio = await generate({
       text: script,
+      subtitle: {
+        splitBy: "word",
+        wordsPerCue: 3,
+      },
     })
     consola.success("Audio generation completed")
     return audio

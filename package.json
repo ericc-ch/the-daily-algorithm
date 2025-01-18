@@ -6,7 +6,8 @@
     "knip": "knip",
     "lint": "eslint . --cache",
     "migration:generate": "npx drizzle-kit generate",
-    "start": "bun run ./src/main.ts"
+    "start": "bun run ./src/main.ts",
+    "studio": "remotionb studio"
   },
   "dependencies": {
     "@echristian/edge-tts": "^0.0.11",
