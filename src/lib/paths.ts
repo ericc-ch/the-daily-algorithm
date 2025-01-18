@@ -1,6 +1,6 @@
+import fs from "node:fs/promises"
 import os from "node:os"
 import path from "pathe"
-import fs from "node:fs/promises"
 
 const APP_DIR = path.join(
   os.homedir(),

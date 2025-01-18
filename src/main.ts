@@ -5,12 +5,14 @@ import { join } from "pathe"
 
 import { downloadVideo } from "./lib/download-video"
 import { MIME_TYPES } from "./lib/mime-types"
-import { PATHS } from "./lib/paths"
+import { ensureDirectories, PATHS } from "./lib/paths"
 import { generateAudio } from "./modules/audio-generator/main"
 import { fileManager } from "./modules/script-generator/lib/file-manager"
 import { generateScript } from "./modules/script-generator/main"
 
 consola.level = 5
+
+await ensureDirectories()
 
 const location = await downloadVideo({
   url: "https://www.youtube.com/shorts/DxlrwbAhM5o",
