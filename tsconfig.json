@@ -29,7 +29,5 @@
     "paths": {
       "~/*": ["./src/*"]
     }
-  },
-  // No need for exclude since we're handling all files
-  "include": ["src"]
+  }
 }

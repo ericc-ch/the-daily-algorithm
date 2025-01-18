@@ -6,7 +6,7 @@ import { PATHS } from "~/lib/paths"
 
 Config.setEntryPoint("./src/modules/video-generator/main.ts")
 Config.setPublicDir(PATHS.REMOTION_PUBLIC_DIR)
-Config.setOutputLocation(PATHS.REMOTION_OUTPUT_DIR)
+Config.setOutputLocation(PATHS.OUTPUT_DIR)
 
 Config.setConcurrency(os.cpus().length - 1)
 Config.setChromeMode("chrome-for-testing")

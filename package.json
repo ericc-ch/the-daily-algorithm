@@ -25,13 +25,17 @@
     "nano-spawn": "^0.2.0",
     "pathe": "^2.0.2",
     "playwright": "^1.49.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "remotion": "^4.0.250",
     "std-env": "^3.8.0",
-    "tsconfig-paths-webpack-plugin": "^4.2.0"
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@echristian/eslint-config": "^0.0.16",
     "@types/bun": "^1.1.17",
+    "@types/react": "^19.0.7",
     "drizzle-kit": "^0.30.2",
     "eslint": "^9.18.0",
     "knip": "^5.42.2",
