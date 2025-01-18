@@ -49,7 +49,7 @@ export function ViralVideo({
         <OffthreadVideo muted playbackRate={0.2} src={staticVideo} />
       </Sequence>
 
-      <Sequence from={audioLength + 1}>
+      <Sequence from={audioLength}>
         <OffthreadVideo src={staticVideo} />
       </Sequence>
 
