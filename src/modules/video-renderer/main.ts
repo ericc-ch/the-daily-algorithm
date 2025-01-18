@@ -12,15 +12,15 @@ import { PATHS } from "~/lib/paths"
 
 import type { ViralVideoProps } from "./compositions/viral-video"
 
-export async function renderVideo() {
-  const fileContent = await readFile(PATHS.SUBTITLE_PATH, "utf-8")
-  const subtitles = JSON.parse(fileContent) as Array<ParseSubtitleResult>
+interface BundleOptions {
+  entryPoint: string
+  publicDir: string
+}
 
-  const entryPoint = path.join(import.meta.dirname, "remotion-entry.ts")
-
-  const bundleLocation = await bundle({
+async function createBundle({ entryPoint, publicDir }: BundleOptions) {
+  return bundle({
     entryPoint,
-    publicDir: PATHS.REMOTION_PUBLIC_DIR,
+    publicDir,
     onProgress: (progress) => {
       consola.info(`Bundle progress: ${progress}%`)
     },
@@ -35,6 +35,68 @@ export async function renderVideo() {
       },
     }),
   })
+}
+
+interface CompositionOptions {
+  bundleLocation: string
+  inputProps: Partial<ViralVideoProps>
+}
+
+async function createComposition({
+  bundleLocation,
+  inputProps,
+}: CompositionOptions) {
+  return selectComposition({
+    id: "viral-video",
+    serveUrl: bundleLocation,
+    inputProps,
+    chromeMode: "chrome-for-testing",
+  })
+}
+
+async function renderVideoMedia(
+  composition: Awaited<ReturnType<typeof selectComposition>>,
+  bundleLocation: string,
+  inputProps: Partial<ViralVideoProps>,
+) {
+  const renderResult = await renderMedia({
+    composition,
+    serveUrl: bundleLocation,
+    codec: "h264",
+    inputProps,
+    concurrency: os.cpus().length,
+    hardwareAcceleration: "if-possible",
+    x264Preset: "veryfast",
+    chromeMode: "chrome-for-testing",
+    chromiumOptions: {
+      gl: "vulkan",
+    },
+    onProgress: ({ progress }) => {
+      const intProgress = Math.round(progress * 100)
+      consola.info(`Render progress: ${intProgress}%`)
+    },
+  })
+
+  if (!renderResult.buffer) {
+    throw new Error("Video without output location must return buffer")
+  }
+
+  return renderResult.buffer
+}
+
+async function loadSubtitles(): Promise<Array<ParseSubtitleResult>> {
+  const fileContent = await readFile(PATHS.SUBTITLE_PATH, "utf-8")
+  return JSON.parse(fileContent) as Array<ParseSubtitleResult>
+}
+
+export async function renderVideo() {
+  const subtitles = await loadSubtitles()
+
+  const entryPoint = path.join(import.meta.dirname, "remotion-entry.ts")
+  const bundleLocation = await createBundle({
+    entryPoint,
+    publicDir: PATHS.REMOTION_PUBLIC_DIR,
+  })
 
   const inputProps: Partial<ViralVideoProps> = {
     audioSrc: PATHS.AUDIO_FILE_NAME,
@@ -42,36 +104,6 @@ export async function renderVideo() {
     subtitles,
   }
 
-  const composition = await selectComposition({
-    id: "viral-video",
-    serveUrl: bundleLocation,
-    inputProps,
-    chromeMode: "chrome-for-testing",
-  })
-
-  const renderResult = await renderMedia({
-    composition,
-    serveUrl: bundleLocation,
-
-    codec: "h264",
-    inputProps,
-    concurrency: os.cpus().length,
-    hardwareAcceleration: "if-possible",
-    x264Preset: "veryfast",
-
-    chromeMode: "chrome-for-testing",
-    chromiumOptions: {
-      gl: "vulkan",
-    },
-
-    onProgress: ({ progress }) => {
-      const intProgress = Math.round(progress * 100)
-      consola.info(`Render progress: ${intProgress}%`)
-    },
-  })
-
-  if (!renderResult.buffer)
-    throw new Error("Video without output location must return buffer")
-
-  return renderResult.buffer
+  const composition = await createComposition({ bundleLocation, inputProps })
+  return renderVideoMedia(composition, bundleLocation, inputProps)
 }
