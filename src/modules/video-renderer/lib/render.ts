@@ -4,6 +4,17 @@ import os from "node:os"
 
 import type { ViralVideoProps } from "../compositions/viral-video"
 
+function createProgressCallback() {
+  let lastProgress = -1
+  return ({ progress }: { progress: number }) => {
+    const intProgress = Math.round(progress * 100)
+    if (intProgress !== lastProgress) {
+      consola.info(`Render progress: ${intProgress}%`)
+      lastProgress = intProgress
+    }
+  }
+}
+
 export async function renderVideoMedia(
   composition: Awaited<ReturnType<typeof selectComposition>>,
   bundleLocation: string,
@@ -21,10 +32,7 @@ export async function renderVideoMedia(
     chromiumOptions: {
       gl: "vulkan",
     },
-    onProgress: ({ progress }) => {
-      const intProgress = Math.round(progress * 100)
-      consola.info(`Render progress: ${intProgress}%`)
-    },
+    onProgress: createProgressCallback(),
   })
 
   if (!renderResult.buffer) {
