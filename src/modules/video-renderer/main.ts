@@ -4,7 +4,7 @@ import { PATHS } from "~/lib/paths"
 
 import type { ViralVideoProps } from "./compositions/viral-video"
 
-import { createCachedBundle } from "./lib/bundle"
+import { createBundle } from "./lib/bundle"
 import { createComposition } from "./lib/composition"
 import { renderVideoMedia } from "./lib/render"
 import { loadSubtitles } from "./lib/subtitles"
@@ -13,7 +13,7 @@ export async function renderVideo() {
   const subtitles = await loadSubtitles()
 
   const entryPoint = path.join(import.meta.dirname, "remotion-entry.ts")
-  const bundleLocation = await createCachedBundle({
+  const bundleLocation = await createBundle({
     entryPoint,
     publicDir: PATHS.REMOTION_PUBLIC_DIR,
   })
