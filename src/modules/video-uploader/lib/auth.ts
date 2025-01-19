@@ -124,7 +124,7 @@ export async function getValidAccessToken(): Promise<string> {
         `Refreshed access token will expire at ${dateFormatter.format(newTokens.expiresAt)}`,
       )
       return newTokens.accessToken
-    } catch (error) {
+    } catch (_error) {
       consola.warn("Failed to refresh token, starting new authentication flow")
       const newTokens = await authenticateWithGoogle()
       await saveTokens(newTokens)
