@@ -1,7 +1,6 @@
 import { defineCommand, runMain } from "citty"
 import { consola } from "consola"
 
-import { ensureDirectories } from "~/lib/paths"
 import { fileManager } from "~/modules/script-generator/lib/file-manager"
 
 import { auth } from "./commands/auth"
@@ -17,11 +16,6 @@ const cli = defineCommand({
     generate,
     auth,
     start,
-  },
-  setup: async () => {
-    consola.info("Ensuring required directories exist...")
-    await ensureDirectories()
-    consola.success("Directories created successfully")
   },
   cleanup: async () => {
     consola.info("Cleaning up temporary files...")
