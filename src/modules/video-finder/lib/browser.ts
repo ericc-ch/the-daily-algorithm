@@ -1,12 +1,23 @@
 import playwright from "playwright"
+import { chromium } from "playwright-extra"
+import StealthPlugin from "puppeteer-extra-plugin-stealth"
 
 import { getChromiumPath } from "../../../lib/browser.js"
 
 const createBrowser = async (): Promise<playwright.Browser> => {
   const executablePath = await getChromiumPath()
+
+  chromium.use(StealthPlugin())
+
+  // https://github.com/berstend/puppeteer-extra/tree/master/packages/playwright-extra#-puppeteer-extra-plugin-stealth
+  chromium.plugins.setDependencyDefaults("stealth/evasions/webgl.vendor", {
+    vendor: "Bob",
+    renderer: "Alice",
+  })
+
   return playwright.chromium.launch({
     ...(executablePath && { executablePath }),
-    headless: false,
+    headless: true,
   })
 }
 

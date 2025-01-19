@@ -35,6 +35,8 @@
     "open": "^10.1.0",
     "pathe": "^2.0.2",
     "playwright": "^1.49.1",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "remotion": "^4.0.250",
