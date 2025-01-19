@@ -87,6 +87,53 @@ async function authenticateWithGoogle(): Promise<AuthResult> {
   }
 }
 
+const REFRESH_INTERVAL = 30 * 60 * 1000 // 30 minutes
+
+export async function refreshTokenIfNeeded(): Promise<void> {
+  try {
+    const tokens = await loadTokens()
+    if (!tokens) {
+      consola.debug("No tokens to refresh")
+      return
+    }
+
+    const expiresIn = tokens.expiresAt.getTime() - Date.now()
+    if (expiresIn <= 30 * 60 * 1000) {
+      // Refresh if less than 30 minutes until expiry
+      consola.info("Refreshing access token in background")
+      const google = new arctic.Google(
+        ENV.GOOGLE_CLIENT_ID,
+        ENV.GOOGLE_CLIENT_SECRET,
+        "http://localhost:4160/auth/callback",
+      )
+
+      const newTokens = await refreshAccessToken(google, tokens.refreshToken)
+      const updatedTokens = {
+        ...newTokens,
+        refreshToken: tokens.refreshToken,
+      }
+      await saveTokens(updatedTokens)
+      consola.success("Background token refresh successful")
+    }
+  } catch (error) {
+    consola.error("Background token refresh failed:", error)
+  }
+}
+
+export async function startBackgroundRefresh(): Promise<() => void> {
+  // Do initial refresh
+  await refreshTokenIfNeeded()
+
+  const intervalId = setInterval(refreshTokenIfNeeded, REFRESH_INTERVAL)
+  consola.success("Background token refresh started")
+
+  // Return cleanup function
+  return () => {
+    clearInterval(intervalId)
+    consola.info("Background token refresh stopped")
+  }
+}
+
 export async function getValidAccessToken(): Promise<string> {
   const tokens = await loadTokens()
   if (!tokens) {
