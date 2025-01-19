@@ -3,6 +3,11 @@ import { Hono } from "hono"
 import open from "open"
 import { serve, type ServerHandler } from "srvx"
 
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+  timeStyle: "medium",
+})
+
 const AUTH_PORT = 4160
 const AUTH_TIMEOUT = 5 * 60 * 1000 // 5 minutes
 
@@ -78,7 +83,7 @@ export async function getValidAccessToken(): Promise<string> {
     const newTokens = await authenticateWithGoogle()
     await saveTokens(newTokens)
     consola.info(
-      `New access token will expire at ${newTokens.expiresAt.toLocaleString()}`,
+      `New access token will expire at ${dateFormatter.format(newTokens.expiresAt)}`,
     )
     return newTokens.accessToken
   }
@@ -86,7 +91,7 @@ export async function getValidAccessToken(): Promise<string> {
   const expiresIn = tokens.expiresAt.getTime() - Date.now()
   const expiresInMinutes = Math.floor(expiresIn / (60 * 1000))
   consola.info(
-    `Current access token expires in ${expiresInMinutes} minutes (at ${tokens.expiresAt.toLocaleString()})`,
+    `Current access token expires in ${expiresInMinutes} minutes (at ${dateFormatter.format(tokens.expiresAt)})`,
   )
 
   if (expiresIn <= 5 * 60 * 1000) {
@@ -94,7 +99,7 @@ export async function getValidAccessToken(): Promise<string> {
     const newTokens = await authenticateWithGoogle()
     await saveTokens(newTokens)
     consola.info(
-      `New access token will expire at ${newTokens.expiresAt.toLocaleString()}`,
+      `New access token will expire at ${dateFormatter.format(newTokens.expiresAt)}`,
     )
     return newTokens.accessToken
   }
