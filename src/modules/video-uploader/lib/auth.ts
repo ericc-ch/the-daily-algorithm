@@ -10,7 +10,16 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 const AUTH_PORT = 4160
 const AUTH_TIMEOUT = 5 * 60 * 1000 // 5 minutes
 
-import { initializeAuth, createAuthUrl, validateAuthCode } from "./google-oauth"
+import * as arctic from "arctic"
+
+import { ENV } from "~/lib/env"
+
+import {
+  initializeAuth,
+  createAuthUrl,
+  validateAuthCode,
+  refreshAccessToken,
+} from "./google-oauth"
 import { loadTokens, saveTokens, type AuthResult } from "./token-storage"
 
 async function authenticateWithGoogle(): Promise<AuthResult> {
@@ -43,6 +52,7 @@ async function authenticateWithGoogle(): Promise<AuthResult> {
 
       resolve({
         accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
         expiresAt: tokens.expiresAt,
       })
 
@@ -96,13 +106,30 @@ export async function getValidAccessToken(): Promise<string> {
   )
 
   if (expiresIn <= 5 * 60 * 1000) {
-    consola.info("Access token is expired, starting new authentication")
-    const newTokens = await authenticateWithGoogle()
-    await saveTokens(newTokens)
-    consola.info(
-      `New access token will expire at ${dateFormatter.format(newTokens.expiresAt)}`,
+    consola.info("Access token expired, attempting to refresh")
+    const google = new arctic.Google(
+      ENV.GOOGLE_CLIENT_ID,
+      ENV.GOOGLE_CLIENT_SECRET,
+      "http://localhost:4160/auth/callback",
     )
-    return newTokens.accessToken
+
+    try {
+      const newTokens = await refreshAccessToken(google, tokens.refreshToken)
+      const updatedTokens = {
+        ...newTokens,
+        refreshToken: tokens.refreshToken, // Keep the existing refresh token
+      }
+      await saveTokens(updatedTokens)
+      consola.info(
+        `Refreshed access token will expire at ${dateFormatter.format(newTokens.expiresAt)}`,
+      )
+      return newTokens.accessToken
+    } catch (error) {
+      consola.warn("Failed to refresh token, starting new authentication flow")
+      const newTokens = await authenticateWithGoogle()
+      await saveTokens(newTokens)
+      return newTokens.accessToken
+    }
   }
 
   return tokens.accessToken
