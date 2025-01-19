@@ -2,14 +2,14 @@
   "name": "the-daily-algorithm",
   "type": "module",
   "scripts": {
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "npx drizzle-kit migrate",
+    "db:push": "npx drizzle-kit push",
     "dev": "bun --hot ./src/main.ts",
     "knip": "knip",
     "lint": "eslint . --cache",
     "start": "bun run ./src/main.ts",
-    "studio": "remotionb studio",
-    "db:generate": "npx drizzle-kit generate",
-    "db:migrate": "npx drizzle-kit migrate",
-    "db:push": "npx drizzle-kit push"
+    "studio": "remotionb studio"
   },
   "dependencies": {
     "@echristian/edge-tts": "^0.0.11",
