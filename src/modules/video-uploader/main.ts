@@ -1,8 +1,17 @@
 import { consola } from "consola"
 import { Hono } from "hono"
+import fs from "node:fs/promises"
+import open from "open"
 import { serve, type ServerHandler } from "srvx"
 
-import { initializeAuth, createAuthUrl, validateAuthCode } from "./auth"
+import { PATHS } from "~/lib/paths"
+
+import {
+  initializeAuth,
+  createAuthUrl,
+  validateAuthCode,
+  refreshAccessToken,
+} from "./auth"
 
 interface AuthResult {
   accessToken: string
@@ -10,16 +19,72 @@ interface AuthResult {
   expiresAt: Date
 }
 
+interface StoredTokens {
+  accessToken: string
+  refreshToken: string | null
+  expiresAt: string // ISO date string
+}
+
+async function saveTokens(tokens: AuthResult): Promise<void> {
+  const storedTokens: StoredTokens = {
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    expiresAt: tokens.expiresAt.toISOString(),
+  }
+  await fs.writeFile(PATHS.TOKEN_PATH, JSON.stringify(storedTokens, null, 2))
+}
+
+async function loadTokens(): Promise<AuthResult | null> {
+  try {
+    const data = await fs.readFile(PATHS.TOKEN_PATH, "utf-8")
+    const tokens = JSON.parse(data) as StoredTokens
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresAt: new Date(tokens.expiresAt),
+    }
+  } catch {
+    return null
+  }
+}
+
+async function getValidAccessToken(): Promise<string> {
+  const tokens = await loadTokens()
+  if (!tokens) {
+    const newTokens = await authenticateWithGoogle()
+    await saveTokens(newTokens)
+    return newTokens.accessToken
+  }
+
+  // Check if token needs refresh (e.g., 5 minutes before expiry)
+  const expiresIn = tokens.expiresAt.getTime() - Date.now()
+  if (expiresIn <= 5 * 60 * 1000) {
+    if (!tokens.refreshToken) {
+      const newTokens = await authenticateWithGoogle()
+      await saveTokens(newTokens)
+      return newTokens.accessToken
+    }
+
+    const authState = initializeAuth()
+    const refreshed = await refreshAccessToken(authState, tokens.refreshToken)
+    const newTokens: AuthResult = {
+      ...tokens,
+      accessToken: refreshed.accessToken,
+      expiresAt: refreshed.expiresAt,
+    }
+    await saveTokens(newTokens)
+    return newTokens.accessToken
+  }
+
+  return tokens.accessToken
+}
+
 export async function authenticateWithGoogle(): Promise<AuthResult> {
   const { promise, resolve, reject } = Promise.withResolvers<AuthResult>()
 
   const app = new Hono()
   const authState = initializeAuth()
-
-  app.get("/", (c) => {
-    const authUrl = createAuthUrl(authState)
-    return c.redirect(authUrl)
-  })
+  const authUrl = createAuthUrl(authState)
 
   app.get("/auth/callback", async (c) => {
     try {
@@ -58,18 +123,17 @@ export async function authenticateWithGoogle(): Promise<AuthResult> {
     port: 4160,
   })
 
-  consola.info(
-    "Please open http://localhost:4160 in your browser to authenticate",
-  )
+  await open(authUrl)
+  consola.info("Opening browser for authentication...")
 
   return promise
 }
 
 export async function uploadVideo() {
   try {
-    const auth = await authenticateWithGoogle()
+    const accessToken = await getValidAccessToken()
     consola.success("Successfully authenticated with Google")
-    // TODO: Implement video upload logic using the auth tokens
+    // TODO: Implement video upload logic using the accessToken
   } catch (error) {
     consola.error("Authentication failed:", error)
     throw error

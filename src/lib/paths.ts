@@ -24,6 +24,7 @@ const SUBTITLE_PATH = path.join(REMOTION_PUBLIC_DIR, SUBTITLE_FILE_NAME)
 const VIDEO_FILE_NAME = "video.mp4"
 const VIDEO_PATH = path.join(REMOTION_PUBLIC_DIR, VIDEO_FILE_NAME)
 
+const TOKEN_PATH = path.join(APP_DIR, "token.json")
 const DB_PATH = path.join(APP_DIR, "db.sqlite")
 
 export const PATHS = {
@@ -44,6 +45,7 @@ export const PATHS = {
   VIDEO_FILE_NAME,
   VIDEO_PATH,
 
+  TOKEN_PATH,
   DB_PATH,
 }
 
