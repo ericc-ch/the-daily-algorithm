@@ -2,6 +2,8 @@ import { renderMedia, selectComposition } from "@remotion/renderer"
 import consola from "consola"
 import os from "node:os"
 
+import { getChromiumPath } from "~/lib/browser"
+
 import type { ViralVideoProps } from "../compositions/viral-video"
 
 function createProgressCallback() {
@@ -20,6 +22,8 @@ export async function renderVideoMedia(
   bundleLocation: string,
   inputProps: Partial<ViralVideoProps>,
 ) {
+  const browserExecutable = await getChromiumPath()
+
   const renderResult = await renderMedia({
     composition,
     serveUrl: bundleLocation,
@@ -28,7 +32,7 @@ export async function renderVideoMedia(
     concurrency: os.cpus().length,
     hardwareAcceleration: "if-possible",
     x264Preset: "veryfast",
-    chromeMode: "chrome-for-testing",
+    ...(browserExecutable && { browserExecutable }),
     chromiumOptions: {
       gl: "vulkan",
     },

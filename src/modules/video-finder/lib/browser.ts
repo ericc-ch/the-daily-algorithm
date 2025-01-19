@@ -1,30 +1,6 @@
-import consola from "consola"
-import spawn from "nano-spawn"
 import playwright from "playwright"
-import { isLinux, isMacOS, isWindows } from "std-env"
 
-type BrowserCommand = readonly [string, ReadonlyArray<string>]
-
-const getBrowserCommand = (): BrowserCommand => {
-  if (isLinux || isMacOS) return ["which", ["chromium"]] as const
-  if (isWindows) return ["where", ["chromium"]] as const
-
-  throw new Error(
-    "Unsupported operating system. Cannot determine chromium executable path.",
-  )
-}
-
-const getChromiumPath = async (): Promise<string | null> => {
-  const command = getBrowserCommand()
-  try {
-    const { stdout } = await spawn(...command)
-    const path = stdout.trim()
-    return path || null
-  } catch (_error) {
-    consola.warn("Local Chromium not found, falling back to bundled browser")
-    return null
-  }
-}
+import { getChromiumPath } from "../../../lib/browser.js"
 
 const createBrowser = async (): Promise<playwright.Browser> => {
   const executablePath = await getChromiumPath()
