@@ -7,7 +7,7 @@ import { db } from "~/database/main"
 import { video, type Video } from "~/database/schemas/video"
 import { downloadVideo } from "~/lib/download-video"
 import { MIME_TYPES } from "~/lib/mime-types"
-import { ensureDirectories, PATHS } from "~/lib/paths"
+import { PATHS } from "~/lib/paths"
 import { generateAudio } from "~/modules/audio-generator/main"
 import { fileManager } from "~/modules/script-generator/lib/file-manager"
 import { generateScript } from "~/modules/script-generator/main"
@@ -31,10 +31,6 @@ export async function generateVideo(): Promise<Video> {
     .returning()
 
   try {
-    consola.info("Ensuring required directories exist...")
-    await ensureDirectories()
-    consola.success("Directories created successfully")
-
     consola.info("Finding random YouTube Short...")
     const shortUrl = await findRandomShort()
     consola.success(`Found Short: ${shortUrl}`)
@@ -100,10 +96,6 @@ export async function generateVideo(): Promise<Video> {
       })
       .where(eq(video.id, entry.id))
       .returning()
-
-    consola.info("Cleaning up temporary files...")
-    await fileManager.deleteAllFiles()
-    consola.success("Cleanup completed")
 
     return updatedVideo
   } catch (error) {
