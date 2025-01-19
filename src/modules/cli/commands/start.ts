@@ -65,9 +65,6 @@ export const start = defineCommand({
           `Auto-upload is ${upload ? "enabled" : "disabled"}\n` +
           "Press Ctrl+C to stop.",
       )
-
-      // Keep the process running
-      // await new Promise(() => {})
     } catch (error) {
       consola.error("Failed to start video generation service:", error)
       process.exit(1)
