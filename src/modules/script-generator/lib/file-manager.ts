@@ -67,7 +67,6 @@ export class GoogleFileManager {
     consola.start("Cleaning up uploaded files")
 
     const fileList = await this.fileManager.listFiles()
-    console.log(fileList)
 
     // Google is lying, `fileList` can be an empty object
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
