@@ -8,7 +8,7 @@ import { loadTokens } from "~/modules/video-uploader/lib/token-storage"
 export const start = defineCommand({
   meta: {
     name: "start",
-    description: "Start the application and maintain authentication",
+    description: "Start the cron job for video generation",
   },
   async run() {
     try {
