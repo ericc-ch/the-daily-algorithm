@@ -13,10 +13,10 @@ export const video = sqliteTable("video", {
       "pending_video",
       "pending_script",
       "pending_audio",
-      "pending_render", 
+      "pending_render",
       "pending_upload",
       "completed",
-      "failed"
+      "failed",
     ],
   }).default("pending_video"),
 
