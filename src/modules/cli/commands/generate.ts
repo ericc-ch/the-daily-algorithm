@@ -59,7 +59,7 @@ export const generate = defineCommand({
     consola.success("Video rendering completed")
 
     consola.info("Saving final video...")
-    await writeFile(PATHS.OUTPUT_PATH, Buffer.from(result.buffer))
+    await writeFile(PATHS.outputPath(script), Buffer.from(result.buffer))
     consola.success("Final video saved successfully")
 
     consola.info("Cleaning up temporary files...")

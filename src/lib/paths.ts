@@ -11,7 +11,7 @@ const APP_DIR = path.join(
 const CACHE_DIR = path.join(os.homedir(), ".cache", "the-daily-algorithm")
 
 const OUTPUT_DIR = path.join(APP_DIR, "output")
-const OUTPUT_PATH = path.join(OUTPUT_DIR, "output.mp4")
+const outputPath = (title: string) => path.join(OUTPUT_DIR, `${title}.mp4`)
 
 const REMOTION_PUBLIC_DIR = path.join(APP_DIR, "remotion", "public")
 
@@ -32,7 +32,7 @@ export const PATHS = {
   CACHE_DIR,
 
   OUTPUT_DIR,
-  OUTPUT_PATH,
+  outputPath,
 
   REMOTION_PUBLIC_DIR,
 
