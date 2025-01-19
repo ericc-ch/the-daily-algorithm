@@ -1,3 +1,4 @@
+import { consola } from "consola"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "pathe"
@@ -50,10 +51,20 @@ export const PATHS = {
 }
 
 export async function ensureDirectories(): Promise<void> {
+  // Ensure all directories exist
   await Promise.all([
     fs.mkdir(APP_DIR, { recursive: true }),
     fs.mkdir(CACHE_DIR, { recursive: true }),
     fs.mkdir(REMOTION_PUBLIC_DIR, { recursive: true }),
     fs.mkdir(OUTPUT_DIR, { recursive: true }),
   ])
+
+  // Ensure database file exists by touching it (creates if doesn't exist, updates timestamp if it does)
+  try {
+    const handle = await fs.open(DB_PATH, "a")
+    await handle.close()
+  } catch (error) {
+    consola.error(`Failed to ensure database file exists at ${DB_PATH}:`, error)
+    throw error
+  }
 }
