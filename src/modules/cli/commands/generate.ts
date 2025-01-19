@@ -11,13 +11,22 @@ import { fileManager } from "~/modules/script-generator/lib/file-manager"
 import { generateScript } from "~/modules/script-generator/main"
 import { findRandomShort } from "~/modules/video-finder/main"
 import { renderVideo } from "~/modules/video-renderer/main"
+import { uploadVideo } from "~/modules/video-uploader/main"
 
 export const generate = defineCommand({
   meta: {
     name: "generate",
     description: "Trigger a new video generation",
   },
-  async run() {
+  args: {
+    upload: {
+      alias: "u",
+      type: "boolean",
+      description: "Upload the generated video to YouTube",
+      default: false,
+    },
+  },
+  async run({ args: { upload: shouldUpload } }) {
     consola.info("Ensuring required directories exist...")
     await ensureDirectories()
     consola.success("Directories created successfully")
@@ -58,9 +67,19 @@ export const generate = defineCommand({
     const result = await renderVideo()
     consola.success("Video rendering completed")
 
-    consola.info("Saving final video...")
-    await writeFile(PATHS.outputPath(script), Buffer.from(result.buffer))
-    consola.success("Final video saved successfully")
+    if (shouldUpload) {
+      consola.info("Uploading video to YouTube...")
+      await uploadVideo({
+        video: new Blob([result.buffer], { type: "video/mp4" }),
+        title: script,
+        description: "Auto-generated video",
+        privacyStatus: "unlisted",
+      })
+    } else {
+      consola.info("Saving final video...")
+      await writeFile(PATHS.outputPath(script), Buffer.from(result.buffer))
+      consola.success("Final video saved successfully")
+    }
 
     consola.info("Cleaning up temporary files...")
     await fileManager.deleteAllFiles()
