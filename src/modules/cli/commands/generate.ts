@@ -1,4 +1,5 @@
 import { defineCommand } from "citty"
+
 import { generateVideo } from "../lib/generate-video"
 
 export const generate = defineCommand({

@@ -10,14 +10,14 @@ export const video = sqliteTable("video", {
 
   status: text("status", {
     enum: [
-      "pending",
-      "processing_script",
-      "processing_audio",
-      "processing_video",
-      "processing_upload",
-      "uploaded",
+      "pending_video",
+      "pending_script",
+      "pending_audio",
+      "pending_render",
+      "pending_upload",
+      "completed",
     ],
-  }).default("pending"),
+  }).default("pending_video"),
 
   created_at: integer("created_at", { mode: "timestamp" }).$defaultFn(
     () => new Date(),

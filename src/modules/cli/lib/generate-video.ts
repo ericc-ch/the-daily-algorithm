@@ -1,6 +1,7 @@
 import { consola } from "consola"
 import { Buffer } from "node:buffer"
 import { copyFile, writeFile } from "node:fs/promises"
+import { eq } from "drizzle-orm"
 
 import { downloadVideo } from "~/lib/download-video"
 import { MIME_TYPES } from "~/lib/mime-types"
@@ -10,9 +11,26 @@ import { fileManager } from "~/modules/script-generator/lib/file-manager"
 import { generateScript } from "~/modules/script-generator/main"
 import { findRandomShort } from "~/modules/video-finder/main"
 import { renderVideo } from "~/modules/video-renderer/main"
-import { uploadVideo } from "~/modules/video-uploader/main"
+import { db } from "~/database/main"
+import { video, type Video } from "~/database/schemas/video"
 
-export async function generateVideo(shouldUpload: boolean) {
+async function updateVideoStatus(id: number, status: Video["status"]) {
+  await db
+    .update(video)
+    .set({ status, updated_at: new Date() })
+    .where(eq(video.id, id))
+}
+
+export async function generateVideo() {
+  // Create initial database entry
+  const [entry] = await db
+    .insert(video)
+    .values({
+      status: "pending_video",
+    })
+    .returning()
+
+  try {
   consola.info("Ensuring required directories exist...")
   await ensureDirectories()
   consola.success("Directories created successfully")

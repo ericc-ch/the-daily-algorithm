@@ -3,13 +3,11 @@ import { consola } from "consola"
 import { CronJob } from "cron"
 import process from "node:process"
 
-import { startBackgroundRefresh } from "~/modules/video-uploader/lib/auth"
+import { generateVideo } from "../../lib/generate-video"
 
-import { generateVideo } from "../lib/generate-video"
-
-export const start = defineCommand({
+export const generate = defineCommand({
   meta: {
-    name: "start",
+    name: "generate",
     description: "Start the automated video generation service",
   },
   args: {
@@ -17,43 +15,31 @@ export const start = defineCommand({
       alias: "s",
       type: "string",
       description: "Cron schedule expression (default: every 6 hours)",
-      default: "0 0 */6 * * *", // Note: cron package uses 6-part expression with seconds
-    },
-    upload: {
-      alias: "u",
-      type: "boolean",
-      description: "Upload generated videos to YouTube",
-      default: true,
+      default: "0 0 */6 * * *",
     },
   },
 
-  async run({ args: { schedule, upload } }) {
+  run({ args: { schedule } }) {
     try {
-      // Start token refresh service first
-      const stopRefresh = await startBackgroundRefresh()
-
-      // Create the cron job
       const job = new CronJob(
         schedule,
         async () => {
           try {
             consola.info("Starting scheduled video generation...")
-            await generateVideo(upload)
+            await generateVideo()
             consola.success("Scheduled video generation completed")
           } catch (error) {
             consola.error("Scheduled video generation failed:", error)
           }
         },
-        null, // onComplete
-        true, // start,
-        "UTC", // timezone
+        null,
+        true,
+        "UTC",
       )
 
-      // Handle cleanup on application exit
       const cleanup = () => {
         console.log("\nReceived shutdown signal. Cleaning up...")
         job.stop()
-        stopRefresh()
         process.exit(0)
       }
 
@@ -62,7 +48,6 @@ export const start = defineCommand({
 
       consola.success(
         `Video generation service started with schedule: ${schedule}\n` +
-          `Auto-upload is ${upload ? "enabled" : "disabled"}\n` +
           "Press Ctrl+C to stop.",
       )
     } catch (error) {

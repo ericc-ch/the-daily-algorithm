@@ -6,7 +6,7 @@ import { PATHS } from "./src/lib/paths"
 // https://github.com/oven-sh/bun/issues/7343
 
 export default defineConfig({
-  out: "./.drizzle",
+  out: "./drizzle",
   schema: "./src/database/schemas/*",
   dialect: "sqlite",
   dbCredentials: {
