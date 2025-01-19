@@ -7,6 +7,7 @@ The script should be:
 - Short, no more than 1 sentence.
 - Direct and have something to do with the video.
 - Engaging, the user must be interested to see the full video.
+- Must be relevant to the main topic / point of the video.
 
 Here are some examples of the script for the video:
 
