@@ -67,21 +67,20 @@ export const generate = defineCommand({
     const result = await renderVideo()
     consola.success("Video rendering completed")
 
+    const videoPath = PATHS.outputPath(script)
+
+    consola.info("Saving final video...")
+    await writeFile(videoPath, Buffer.from(result.buffer))
+    consola.success("Final video saved successfully")
+
     if (shouldUpload) {
       consola.info("Uploading video to YouTube...")
-      const videoBlob = new Blob([new Uint8Array(result.buffer)], {
-        type: "video/mp4",
-      })
       await uploadVideo({
-        video: videoBlob,
+        videoPath,
         title: script,
         description: script,
         privacyStatus: "public",
       })
-    } else {
-      consola.info("Saving final video...")
-      await writeFile(PATHS.outputPath(script), Buffer.from(result.buffer))
-      consola.success("Final video saved successfully")
     }
 
     consola.info("Cleaning up temporary files...")

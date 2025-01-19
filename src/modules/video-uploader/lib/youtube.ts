@@ -9,12 +9,12 @@ export interface VideoMetadata {
 }
 
 interface UploadOptions extends VideoMetadata {
-  video: string | Blob
+  videoPath: string
 }
 
 export async function uploadToYoutube(
   accessToken: string,
-  { video, privacyStatus = "public", ...metadata }: UploadOptions,
+  { videoPath, privacyStatus = "public", ...metadata }: UploadOptions,
 ) {
   const youtube = google.youtube("v3")
   const auth = new google.auth.OAuth2()
@@ -23,8 +23,7 @@ export async function uploadToYoutube(
   consola.info("Initiating video upload to YouTube...")
 
   try {
-    const mediaBody =
-      typeof video === "string" ? createReadStream(video) : video.stream()
+    const mediaBody = createReadStream(videoPath)
 
     const response = await youtube.videos.insert({
       auth,

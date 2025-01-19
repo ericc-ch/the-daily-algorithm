@@ -4,10 +4,13 @@ import { getValidAccessToken } from "./lib/auth"
 import { uploadToYoutube, type VideoMetadata } from "./lib/youtube"
 
 interface UploadVideoOptions extends VideoMetadata {
-  video: string | Blob
+  videoPath: string
 }
 
-export async function uploadVideo({ video, ...metadata }: UploadVideoOptions) {
+export async function uploadVideo({
+  videoPath,
+  ...metadata
+}: UploadVideoOptions) {
   const attemptUpload = async (retrying = false) => {
     try {
       const accessToken = await getValidAccessToken()
@@ -18,7 +21,7 @@ export async function uploadVideo({ video, ...metadata }: UploadVideoOptions) {
       }
 
       const result = await uploadToYoutube(accessToken, {
-        video,
+        videoPath,
         ...metadata,
       })
 

@@ -17,7 +17,7 @@ export async function findRandomShort(): Promise<string> {
   const { page, cleanup } = await createPage()
 
   try {
-    await page.goto("https://www.youtube.com/shorts")
+    await page.goto("https://www.youtube.com/shorts", { timeout: 60_000 })
     await page.waitForURL(/\/shorts\/[^/]+/, { timeout: 60_000 })
     return page.url()
   } finally {
