@@ -5,6 +5,7 @@ import { fileManager } from "~/modules/script-generator/lib/file-manager"
 
 import { auth } from "./commands/auth"
 import { generate } from "./commands/generate"
+import { prune } from "./commands/prune"
 import { start } from "./commands/start/command"
 
 const cli = defineCommand({
@@ -16,6 +17,7 @@ const cli = defineCommand({
     generate,
     auth,
     start,
+    prune,
   },
   cleanup: async () => {
     consola.info("Cleaning up temporary files...")
