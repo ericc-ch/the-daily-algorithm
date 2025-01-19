@@ -91,10 +91,13 @@ const REFRESH_INTERVAL = 30 * 60 * 1000 // 30 minutes
 
 export async function refreshTokenIfNeeded(): Promise<void> {
   try {
-    const tokens = await loadTokens()
-    if (!tokens) {
-      consola.debug("No tokens to refresh")
-      return
+    let tokens: AuthResult
+    try {
+      tokens = await loadTokens()
+    } catch (_error) {
+      consola.info("No tokens found, starting new authentication")
+      tokens = await authenticateWithGoogle()
+      await saveTokens(tokens)
     }
 
     const expiresIn = tokens.expiresAt.getTime() - Date.now()
@@ -135,15 +138,18 @@ export async function startBackgroundRefresh(): Promise<() => void> {
 }
 
 export async function getValidAccessToken(): Promise<string> {
-  const tokens = await loadTokens()
-  if (!tokens) {
+  let tokens: AuthResult
+
+  try {
+    tokens = await loadTokens()
+  } catch (_error) {
     consola.info("No tokens found, starting new authentication flow")
-    const newTokens = await authenticateWithGoogle()
-    await saveTokens(newTokens)
+    tokens = await authenticateWithGoogle()
+    await saveTokens(tokens)
     consola.info(
-      `New access token will expire at ${dateFormatter.format(newTokens.expiresAt)}`,
+      `New access token will expire at ${dateFormatter.format(tokens.expiresAt)}`,
     )
-    return newTokens.accessToken
+    return tokens.accessToken
   }
 
   const expiresIn = tokens.expiresAt.getTime() - Date.now()

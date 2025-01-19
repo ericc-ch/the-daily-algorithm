@@ -26,7 +26,7 @@ export async function saveTokens(tokens: AuthResult): Promise<void> {
   consola.success("Authentication tokens saved successfully")
 }
 
-export async function loadTokens(): Promise<AuthResult | null> {
+export async function loadTokens(): Promise<AuthResult> {
   consola.debug("Loading stored authentication tokens...")
   try {
     const data = await fs.readFile(PATHS.TOKEN_PATH, "utf-8")
@@ -39,7 +39,6 @@ export async function loadTokens(): Promise<AuthResult | null> {
     consola.success("Authentication tokens loaded successfully")
     return result
   } catch {
-    consola.info("No stored authentication tokens found")
-    return null
+    throw new Error("No stored authentication tokens found")
   }
 }
