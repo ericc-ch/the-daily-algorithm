@@ -1,44 +1,87 @@
 import { consola } from "consola"
 import { eq } from "drizzle-orm"
+import { existsSync } from "node:fs"
+
+import type { Video } from "~/database/schemas/video"
 
 import { db } from "~/database/main"
 import { video } from "~/database/schemas/video"
 import { PATHS } from "~/lib/paths"
 import { uploadVideo } from "~/modules/video-uploader/main"
 
-export async function uploadPendingVideos() {
-  // Get videos pending upload
-  const pending = await db
+async function updateVideoStatus(
+  videoId: number,
+  status: Video["status"],
+  error?: unknown,
+) {
+  await db
+    .update(video)
+    .set({
+      status,
+      updated_at: new Date(),
+    })
+    .where(eq(video.id, videoId))
+
+  if (error) {
+    consola.error(`Video ID ${videoId} failed:`, error)
+  }
+}
+
+async function processVideo(entry: Video) {
+  const { id, script, title, description } = entry
+
+  if (!script || !title || !description) {
+    throw new Error("Missing required metadata for upload")
+  }
+
+  const videoPath = PATHS.outputPath(script)
+
+  if (!existsSync(videoPath)) {
+    throw new Error(`Video file not found at path: ${videoPath}`)
+  }
+
+  consola.info(`Processing upload for video ID ${id}...`)
+
+  try {
+    await uploadVideo({
+      videoPath,
+      title,
+      description,
+      privacyStatus: "public",
+    })
+
+    await updateVideoStatus(id, "completed")
+    consola.success(`Successfully uploaded video ID ${id}`)
+  } catch (error) {
+    await updateVideoStatus(id, "failed", error)
+    // Re-throw to be handled by the main function
+    throw error
+  }
+}
+
+async function getPendingVideo() {
+  const result = await db
     .select()
     .from(video)
     .where(eq(video.status, "pending_upload"))
     .orderBy(video.created_at)
-    .limit(1) // respect rate limits by processing one at a time
+    .limit(1)
 
-  for (const entry of pending) {
-    try {
-      consola.info(`Processing upload for video ID ${entry.id}...`)
+  return result.at(0)
+}
 
-      const videoPath = PATHS.outputPath(entry.script!)
+export async function uploadPendingVideos() {
+  try {
+    const pendingVideo = await getPendingVideo()
 
-      await uploadVideo({
-        videoPath,
-        title: entry.title!,
-        description: entry.description!,
-        privacyStatus: "public",
-      })
-
-      await db
-        .update(video)
-        .set({
-          status: "completed",
-          updated_at: new Date(),
-        })
-        .where(eq(video.id, entry.id))
-
-      consola.success(`Successfully uploaded video ID ${entry.id}`)
-    } catch (error) {
-      consola.error(`Failed to upload video ID ${entry.id}:`, error)
+    if (!pendingVideo) {
+      consola.info("No pending videos found to upload")
+      return
     }
+
+    await processVideo(pendingVideo)
+  } catch (error) {
+    consola.error("Upload process failed:", error)
+    // Don't exit process - let the service continue running
   }
 }
