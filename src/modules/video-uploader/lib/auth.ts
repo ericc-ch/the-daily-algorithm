@@ -50,11 +50,17 @@ async function authenticateWithGoogle(): Promise<AuthResult> {
 
       await server?.close()
 
-      resolve({
+      const result = {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         expiresAt: tokens.expiresAt,
-      })
+      }
+
+      consola.info(
+        `New tokens obtained - access token will expire at ${dateFormatter.format(tokens.expiresAt)}`,
+      )
+
+      resolve(result)
 
       c.header("Content-Type", "text/html")
       return c.body(
@@ -97,10 +103,18 @@ export async function refreshTokenIfNeeded(): Promise<void> {
     } catch (_error) {
       consola.info("No tokens found, starting new authentication")
       tokens = await authenticateWithGoogle()
+      consola.info(
+        `Background auth - access token will expire at ${dateFormatter.format(tokens.expiresAt)}`,
+      )
       await saveTokens(tokens)
     }
 
     const expiresIn = tokens.expiresAt.getTime() - Date.now()
+    const expiresInMinutes = Math.floor(expiresIn / (60 * 1000))
+    consola.info(
+      `Current access token expires in ${expiresInMinutes} minutes (at ${dateFormatter.format(tokens.expiresAt)})`,
+    )
+
     if (expiresIn <= 30 * 60 * 1000) {
       // Refresh if less than 30 minutes until expiry
       consola.info("Refreshing access token in background")
@@ -116,7 +130,9 @@ export async function refreshTokenIfNeeded(): Promise<void> {
         refreshToken: tokens.refreshToken,
       }
       await saveTokens(updatedTokens)
-      consola.success("Background token refresh successful")
+      consola.success(
+        `Background token refresh successful - new access token will expire at ${dateFormatter.format(updatedTokens.expiresAt)}`,
+      )
     }
   } catch (error) {
     consola.error("Background token refresh failed:", error)
@@ -128,7 +144,10 @@ export async function startBackgroundRefresh(): Promise<() => void> {
   await refreshTokenIfNeeded()
 
   const intervalId = setInterval(refreshTokenIfNeeded, REFRESH_INTERVAL)
-  consola.success("Background token refresh started")
+  const nextRefresh = new Date(Date.now() + REFRESH_INTERVAL)
+  consola.success(
+    `Background token refresh started - next refresh scheduled for ${dateFormatter.format(nextRefresh)}`,
+  )
 
   // Return cleanup function
   return () => {
