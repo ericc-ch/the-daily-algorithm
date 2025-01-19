@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import {
   AbsoluteFill,
   Audio,
@@ -36,10 +37,11 @@ export function ViralVideo({
 }: ViralVideoProps) {
   const { fps } = useVideoConfig()
 
+  // No need to memo this, it's gonna be rebuilt every frame anyway
   const msToFrames = (ms: number) => Math.floor((ms / 1000) * fps)
 
-  const staticAudio = staticFile(audioSrc)
-  const staticVideo = staticFile(videoSrc)
+  const staticAudio = useMemo(() => staticFile(audioSrc), [audioSrc])
+  const staticVideo = useMemo(() => staticFile(videoSrc), [videoSrc])
 
   return (
     <AbsoluteFill style={{ backgroundColor: "black" }}>
