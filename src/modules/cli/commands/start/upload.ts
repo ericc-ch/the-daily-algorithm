@@ -26,13 +26,21 @@ export const upload = defineCommand({
     try {
       const stopRefresh = await startBackgroundRefresh()
 
-      const job = new CronJob(schedule, async () => {
-        try {
-          await uploadPendingVideos()
-        } catch (error) {
-          consola.error("Upload process failed:", error)
-        }
-      })
+      const job = new CronJob(
+        schedule,
+        async () => {
+          try {
+            await uploadPendingVideos()
+          } catch (error) {
+            consola.error("Upload process failed:", error)
+          }
+        },
+        undefined,
+        true, // Start immediately
+        undefined, // timezone
+        undefined,
+        true, // Run job immediately on start
+      )
 
       const cleanup = () => {
         console.log("\nReceived shutdown signal. Cleaning up...")

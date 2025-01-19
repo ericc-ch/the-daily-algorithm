@@ -48,9 +48,11 @@ function runScheduledGeneration(schedule: string) {
         consola.error("Scheduled video generation failed:", error)
       }
     },
-    null,
-    true,
-    "UTC",
+    undefined,
+    true, // Start immediately
+    undefined,
+    undefined,
+    true, // Run job immediately on start
   )
 
   const cleanup = () => {
