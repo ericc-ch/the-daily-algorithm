@@ -65,8 +65,14 @@ export class GoogleFileManager {
 
   async deleteAllFiles(): Promise<void> {
     consola.start("Cleaning up uploaded files")
+
     const fileList = await this.fileManager.listFiles()
-    const totalFiles = fileList.files.length
+    console.log(fileList)
+
+    // Google is lying, `fileList` can be an empty object
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const files = fileList.files ?? []
+    const totalFiles = files.length
 
     if (totalFiles === 0) {
       consola.info("No files to delete")
@@ -75,7 +81,7 @@ export class GoogleFileManager {
 
     consola.info(`Found ${totalFiles} file(s) to delete`)
     const results = await Promise.allSettled(
-      fileList.files.map((file) => this.fileManager.deleteFile(file.name)),
+      files.map((file) => this.fileManager.deleteFile(file.name)),
     )
 
     const succeeded = results.filter((r) => r.status === "fulfilled").length
