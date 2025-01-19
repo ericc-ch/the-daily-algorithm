@@ -2,13 +2,10 @@ import { defineCommand } from "citty"
 import { consola } from "consola"
 
 import { getValidAccessToken } from "~/modules/video-uploader/lib/auth"
-import { saveTokens } from "~/modules/video-uploader/lib/token-storage"
-
-interface TokenJSON {
-  accessToken: string
-  refreshToken: string
-  expiresAt: string
-}
+import {
+  saveTokens,
+  type StoredTokens,
+} from "~/modules/video-uploader/lib/token-storage"
 
 export const auth = defineCommand({
   meta: {
@@ -35,7 +32,7 @@ export const auth = defineCommand({
         })
 
         try {
-          const tokens = JSON.parse(input) as TokenJSON
+          const tokens = JSON.parse(input) as StoredTokens
           if (
             !tokens.accessToken ||
             !tokens.refreshToken ||

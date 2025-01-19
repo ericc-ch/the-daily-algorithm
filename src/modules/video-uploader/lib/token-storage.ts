@@ -9,7 +9,7 @@ export interface AuthResult {
   expiresAt: Date
 }
 
-interface StoredTokens {
+export interface StoredTokens {
   accessToken: string
   refreshToken: string
   expiresAt: string // ISO date string
