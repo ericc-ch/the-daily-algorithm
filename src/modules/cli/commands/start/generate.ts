@@ -1,7 +1,10 @@
 import { defineCommand } from "citty"
 import { consola } from "consola"
 import { CronJob } from "cron"
+import os from "node:os"
 import process from "node:process"
+
+import { setConfig } from "~/lib/config"
 
 import { generateVideo } from "../../lib/generate-video"
 
@@ -87,9 +90,18 @@ export const generate = defineCommand({
       description: "Run continuously instead of using a schedule",
       default: false,
     },
+    cores: {
+      alias: "n",
+      type: "string",
+      description:
+        "Number of CPU cores to use for rendering (default: all cores)",
+      default: os.cpus().length.toString(),
+    },
   },
 
-  async run({ args: { schedule, continuous } }) {
+  async run({ args: { schedule, continuous, cores } }) {
+    setConfig({ concurrency: parseInt(cores, 10) })
+
     try {
       if (continuous) {
         await runContinuousGeneration()

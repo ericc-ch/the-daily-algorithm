@@ -1,6 +1,7 @@
 import { renderMedia, selectComposition } from "@remotion/renderer"
 import consola from "consola"
-import os from "node:os"
+
+import { getConfig } from "~/lib/config"
 
 import type { ViralVideoProps } from "../compositions/viral-video"
 
@@ -30,7 +31,7 @@ export async function renderVideoMedia(
     serveUrl: bundleLocation,
     codec: "h264",
     inputProps,
-    concurrency: os.cpus().length,
+    concurrency: getConfig().concurrency,
     hardwareAcceleration: "if-possible",
     x264Preset: "veryfast",
     // ...(browserExecutable && { browserExecutable }),
