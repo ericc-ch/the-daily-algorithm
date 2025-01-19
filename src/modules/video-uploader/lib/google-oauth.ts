@@ -20,9 +20,16 @@ const createAuthState = (): AuthState => ({
 
 export const createAuthUrl = (authState: AuthState): string => {
   const scopes = ["https://www.googleapis.com/auth/youtube.upload"]
-  return authState.google
-    .createAuthorizationURL(authState.state, authState.codeVerifier, scopes)
-    .toString()
+  const url = authState.google.createAuthorizationURL(
+    authState.state,
+    authState.codeVerifier,
+    scopes,
+  )
+
+  url.searchParams.set("access_type", "offline")
+  url.searchParams.set("prompt", "consent")
+
+  return url.toString()
 }
 
 export const validateAuthCode = async (authState: AuthState, code: string) => {
