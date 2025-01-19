@@ -52,7 +52,7 @@ export function ViralVideo({
       </Sequence>
 
       <Sequence from={audioLength}>
-        <OffthreadVideo src={staticVideo} />
+        <OffthreadVideo src={staticVideo} volume={0.8} />
       </Sequence>
 
       {subtitles.map((subtitle, index) => (
