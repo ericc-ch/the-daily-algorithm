@@ -1,5 +1,6 @@
 import { defineCommand, runMain } from "citty"
 
+import { auth } from "./commands/auth"
 import { generate } from "./commands/generate"
 
 const cli = defineCommand({
@@ -9,6 +10,7 @@ const cli = defineCommand({
   },
   subCommands: {
     generate,
+    auth,
   },
 })
 
