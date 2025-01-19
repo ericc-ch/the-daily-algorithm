@@ -21,7 +21,7 @@ async function updateVideoStatus(id: number, status: Video["status"]) {
     .where(eq(video.id, id))
 }
 
-export async function generateVideo() {
+export async function generateVideo(): Promise<Video> {
   // Create initial database entry
   const [entry] = await db
     .insert(video)
@@ -93,8 +93,9 @@ export async function generateVideo() {
         status: "pending_upload",
         script,
         source_url: shortUrl,
-        title: script, // or generate a better title if needed
-        description: script, // or generate a better description if needed
+        title: script,
+        description: script,
+        video_path: videoPath,
         updated_at: new Date(),
       })
       .where(eq(video.id, entry.id))

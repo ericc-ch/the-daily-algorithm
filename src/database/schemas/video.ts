@@ -8,6 +8,8 @@ export const video = sqliteTable("video", {
   script: text("script"),
   source_url: text("source_url"),
 
+  video_path: text("video_path"),
+
   status: text("status", {
     enum: [
       "pending_video",

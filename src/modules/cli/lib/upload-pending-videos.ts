@@ -6,7 +6,6 @@ import type { Video } from "~/database/schemas/video"
 
 import { db } from "~/database/main"
 import { video } from "~/database/schemas/video"
-import { PATHS } from "~/lib/paths"
 import { uploadVideo } from "~/modules/video-uploader/main"
 
 async function updateVideoStatus(
@@ -28,23 +27,21 @@ async function updateVideoStatus(
 }
 
 async function processVideo(entry: Video) {
-  const { id, script, title, description } = entry
+  const { id, video_path, title, description } = entry
 
-  if (!script || !title || !description) {
+  if (!video_path || !title || !description) {
     throw new Error("Missing required metadata for upload")
   }
 
-  const videoPath = PATHS.outputPath(script)
-
-  if (!existsSync(videoPath)) {
-    throw new Error(`Video file not found at path: ${videoPath}`)
+  if (!existsSync(video_path)) {
+    throw new Error(`Video file not found at path: ${video_path}`)
   }
 
   consola.info(`Processing upload for video ID ${id}...`)
 
   try {
     await uploadVideo({
-      videoPath,
+      videoPath: video_path,
       title,
       description,
       privacyStatus: "public",
