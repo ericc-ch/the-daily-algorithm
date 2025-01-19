@@ -87,7 +87,7 @@ export async function generateVideo(): Promise<Video> {
     consola.success("Final video saved successfully")
 
     // Update database with video details
-    await db
+    const [updatedVideo] = await db
       .update(video)
       .set({
         status: "pending_upload",
@@ -99,10 +99,13 @@ export async function generateVideo(): Promise<Video> {
         updated_at: new Date(),
       })
       .where(eq(video.id, entry.id))
+      .returning()
 
     consola.info("Cleaning up temporary files...")
     await fileManager.deleteAllFiles()
     consola.success("Cleanup completed")
+
+    return updatedVideo
   } catch (error) {
     consola.error(`Failed to generate video ID ${entry.id}:`, error)
     await updateVideoStatus(entry.id, "failed" as const)
