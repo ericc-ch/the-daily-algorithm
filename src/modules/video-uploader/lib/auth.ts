@@ -3,6 +3,9 @@ import { Hono } from "hono"
 import open from "open"
 import { serve, type ServerHandler } from "srvx"
 
+const AUTH_PORT = 4160
+const AUTH_TIMEOUT = 5 * 60 * 1000 // 5 minutes
+
 import {
   initializeAuth,
   createAuthUrl,
@@ -14,6 +17,13 @@ import { loadTokens, saveTokens, type AuthResult } from "./token-storage"
 
 async function authenticateWithGoogle(): Promise<AuthResult> {
   const { promise, resolve, reject } = Promise.withResolvers<AuthResult>()
+  let server: Awaited<ReturnType<typeof serve>> | undefined
+
+  // Set authentication timeout
+  const timeoutId = setTimeout(() => {
+    reject(new Error("Authentication timed out"))
+    server?.close()?.catch(console.error)
+  }, AUTH_TIMEOUT)
 
   const app = new Hono()
   const authState = initializeAuth()
@@ -27,8 +37,9 @@ async function authenticateWithGoogle(): Promise<AuthResult> {
       }
 
       const tokens = await validateAuthCode(authState, code)
+      clearTimeout(timeoutId)
 
-      await server.close()
+      await server?.close()
 
       resolve({
         accessToken: tokens.accessToken,
@@ -41,30 +52,38 @@ async function authenticateWithGoogle(): Promise<AuthResult> {
         "<h1>Authentication successful!</h1><p>You can close this window now.</p>",
       )
     } catch (error) {
-      await server.close()
+      clearTimeout(timeoutId)
+      await server?.close()
       reject(error)
       return c.text("Authentication failed. You can close this window.", 400)
     }
   })
 
-  consola.info("Starting local authentication server...")
-  const server = serve({
-    fetch: app.fetch as ServerHandler,
-    port: 4160,
-  })
+  try {
+    consola.info("Starting local authentication server...")
+    server = serve({
+      fetch: app.fetch as ServerHandler,
+      port: AUTH_PORT,
+    })
 
-  await open(authUrl)
-  consola.info("Opening browser for authentication...")
+    await open(authUrl)
+    consola.info("Opening browser for authentication...")
 
-  const tokens = await promise
-  const refreshManager = createRefreshManager(tokens)
-  refreshManager.start()
-  return tokens
+    const tokens = await promise
+    const refreshManager = createRefreshManager(tokens)
+    refreshManager.start()
+    return tokens
+  } catch (error) {
+    clearTimeout(timeoutId)
+    await server?.close()
+    throw error
+  }
 }
 
 export async function getValidAccessToken(): Promise<string> {
   const tokens = await loadTokens()
   if (!tokens) {
+    consola.info("No tokens found, starting new authentication flow")
     const newTokens = await authenticateWithGoogle()
     await saveTokens(newTokens)
     return newTokens.accessToken
