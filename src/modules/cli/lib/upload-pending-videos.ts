@@ -4,7 +4,7 @@ import { existsSync } from "node:fs"
 
 import type { Video } from "~/database/schemas/video"
 
-import { db } from "~/database/main"
+import { getDB } from "~/database/main"
 import { video } from "~/database/schemas/video"
 import { uploadVideo } from "~/modules/video-uploader/main"
 
@@ -13,7 +13,7 @@ async function updateVideoStatus(
   status: Video["status"],
   error?: unknown,
 ) {
-  await db
+  await getDB()
     .update(video)
     .set({
       status,
@@ -57,7 +57,7 @@ async function processVideo(entry: Video) {
 }
 
 async function getPendingVideo() {
-  const result = await db
+  const result = await getDB()
     .select()
     .from(video)
     .where(eq(video.status, "pending_upload"))

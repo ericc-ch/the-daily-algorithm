@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm"
 import { Buffer } from "node:buffer"
 import { copyFile, writeFile } from "node:fs/promises"
 
-import { db } from "~/database/main"
+import { getDB } from "~/database/main"
 import { video, type Video } from "~/database/schemas/video"
 import { downloadVideo } from "~/lib/download-video"
 import { MIME_TYPES } from "~/lib/mime-types"
@@ -15,7 +15,7 @@ import { findRandomShort } from "~/modules/video-finder/main"
 import { renderVideo } from "~/modules/video-renderer/main"
 
 async function updateVideoStatus(id: number, status: Video["status"]) {
-  await db
+  await getDB()
     .update(video)
     .set({ status, updated_at: new Date() })
     .where(eq(video.id, id))
@@ -23,7 +23,7 @@ async function updateVideoStatus(id: number, status: Video["status"]) {
 
 export async function generateVideo(): Promise<Video> {
   // Create initial database entry
-  const [entry] = await db
+  const [entry] = await getDB()
     .insert(video)
     .values({
       status: "pending_video",
@@ -83,7 +83,7 @@ export async function generateVideo(): Promise<Video> {
     consola.success("Final video saved successfully")
 
     // Update database with video details
-    const [updatedVideo] = await db
+    const [updatedVideo] = await getDB()
       .update(video)
       .set({
         status: "pending_upload",
