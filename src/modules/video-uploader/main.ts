@@ -11,7 +11,7 @@ import {
   createAuthUrl,
   validateAuthCode,
   refreshAccessToken,
-} from "./auth"
+} from "./lib/google-oauth"
 
 interface AuthResult {
   accessToken: string
