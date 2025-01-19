@@ -28,6 +28,8 @@ async function authenticateWithGoogle(): Promise<AuthResult> {
   const authState = initializeAuth()
   const authUrl = createAuthUrl(authState)
 
+  app.get("/", (c) => c.redirect(authUrl))
+
   app.get("/auth/callback", async (c) => {
     try {
       const code = c.req.query("code")
@@ -64,7 +66,7 @@ async function authenticateWithGoogle(): Promise<AuthResult> {
       port: AUTH_PORT,
     })
 
-    await open(authUrl)
+    await open(`http://localhost:${AUTH_PORT}`)
     consola.info("Opening browser for authentication...")
 
     const tokens = await promise
