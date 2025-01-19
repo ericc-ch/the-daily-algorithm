@@ -5,13 +5,11 @@ import { PATHS } from "~/lib/paths"
 
 export interface AuthResult {
   accessToken: string
-  refreshToken: string | null
   expiresAt: Date
 }
 
 interface StoredTokens {
   accessToken: string
-  refreshToken: string | null
   expiresAt: string // ISO date string
 }
 
@@ -19,7 +17,6 @@ export async function saveTokens(tokens: AuthResult): Promise<void> {
   consola.debug("Saving authentication tokens...")
   const storedTokens: StoredTokens = {
     accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
     expiresAt: tokens.expiresAt.toISOString(),
   }
   await fs.writeFile(PATHS.TOKEN_PATH, JSON.stringify(storedTokens, null, 2))
@@ -33,7 +30,6 @@ export async function loadTokens(): Promise<AuthResult | null> {
     const tokens = JSON.parse(data) as StoredTokens
     const result = {
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
       expiresAt: new Date(tokens.expiresAt),
     }
     consola.success("Authentication tokens loaded successfully")
