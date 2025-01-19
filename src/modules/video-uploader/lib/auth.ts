@@ -1,6 +1,5 @@
 import { consola } from "consola"
 import { Hono } from "hono"
-import open from "open"
 import { serve, type ServerHandler } from "srvx"
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
@@ -66,8 +65,8 @@ async function authenticateWithGoogle(): Promise<AuthResult> {
       port: AUTH_PORT,
     })
 
-    await open(`http://localhost:${AUTH_PORT}`)
-    consola.info("Opening browser for authentication...")
+    consola.info("Please open this URL in your browser to authenticate:")
+    consola.info(`http://localhost:${AUTH_PORT}`)
 
     const tokens = await promise
     return tokens
