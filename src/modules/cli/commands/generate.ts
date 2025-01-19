@@ -69,10 +69,13 @@ export const generate = defineCommand({
 
     if (shouldUpload) {
       consola.info("Uploading video to YouTube...")
+      const videoBlob = new Blob([new Uint8Array(result.buffer)], {
+        type: "video/mp4",
+      })
       await uploadVideo({
-        video: new Blob([result.buffer], { type: "video/mp4" }),
+        video: videoBlob,
         title: script,
-        description: "Auto-generated video",
+        description: script,
         privacyStatus: "unlisted",
       })
     } else {
