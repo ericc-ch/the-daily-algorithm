@@ -16,8 +16,9 @@ export const upload = defineCommand({
     schedule: {
       alias: "s",
       type: "string",
-      description: "Cron schedule expression (default: every hour)",
-      default: "0 0 * * * *",
+      description:
+        "Cron schedule expression (default: every 4 hours to stay within YouTube API limits)",
+      default: "0 */4 * * *",
     },
   },
 
