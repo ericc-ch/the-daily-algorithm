@@ -76,7 +76,7 @@ export const generate = defineCommand({
         video: videoBlob,
         title: script,
         description: script,
-        privacyStatus: "unlisted",
+        privacyStatus: "public",
       })
     } else {
       consola.info("Saving final video...")
