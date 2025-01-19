@@ -1,3 +1,4 @@
+import consola from "consola"
 import spawn from "nano-spawn"
 import playwright from "playwright"
 import { isLinux, isMacOS, isWindows } from "std-env"
@@ -13,24 +14,22 @@ const getBrowserCommand = (): BrowserCommand => {
   )
 }
 
-const getChromiumPath = async (): Promise<string> => {
+const getChromiumPath = async (): Promise<string | null> => {
   const command = getBrowserCommand()
   try {
     const { stdout } = await spawn(...command)
     const path = stdout.trim()
-    if (!path) throw new Error("Chromium executable not found")
-    return path
-  } catch (error) {
-    throw new Error(
-      `Failed to locate Chromium executable: ${error instanceof Error ? error.message : String(error)}`,
-    )
+    return path || null
+  } catch (_error) {
+    consola.warn("Local Chromium not found, falling back to bundled browser")
+    return null
   }
 }
 
 const createBrowser = async (): Promise<playwright.Browser> => {
   const executablePath = await getChromiumPath()
   return playwright.chromium.launch({
-    executablePath,
+    ...(executablePath && { executablePath }),
     headless: false,
   })
 }
