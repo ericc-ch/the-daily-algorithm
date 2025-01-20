@@ -1,5 +1,5 @@
 import { consola } from "consola"
-import { eq } from "drizzle-orm"
+import { eq, and, gte } from "drizzle-orm"
 import { Buffer } from "node:buffer"
 import { copyFile, writeFile } from "node:fs/promises"
 
@@ -13,6 +13,18 @@ import { fileManager } from "~/modules/script-generator/lib/file-manager"
 import { generateScript } from "~/modules/script-generator/main"
 import { findRandomShort } from "~/modules/video-finder/main"
 import { renderVideo } from "~/modules/video-renderer/main"
+
+async function checkDuplicateUrl(url: string): Promise<boolean> {
+  const fourMonthsAgo = new Date()
+  fourMonthsAgo.setMonth(fourMonthsAgo.getMonth() - 4)
+
+  const existingVideos = await getDB()
+    .select()
+    .from(video)
+    .where(and(eq(video.source_url, url), gte(video.created_at, fourMonthsAgo)))
+
+  return existingVideos.length > 0
+}
 
 async function updateVideoStatus(id: number, status: Video["status"]) {
   await getDB()
@@ -32,8 +44,19 @@ export async function generateVideo(): Promise<Video> {
 
   try {
     consola.info("Finding random YouTube Short...")
-    const shortUrl = await findRandomShort()
-    consola.success(`Found Short: ${shortUrl}`)
+    let shortUrl = await findRandomShort()
+    let isDuplicate = await checkDuplicateUrl(shortUrl)
+
+    while (isDuplicate) {
+      shortUrl = await findRandomShort()
+      isDuplicate = await checkDuplicateUrl(shortUrl)
+
+      if (isDuplicate) {
+        consola.info(`Found duplicate Short: ${shortUrl}, trying again...`)
+      }
+    }
+
+    consola.success(`Found unique Short: ${shortUrl}`)
 
     consola.info("Starting video download...")
     const location = await downloadVideo({
