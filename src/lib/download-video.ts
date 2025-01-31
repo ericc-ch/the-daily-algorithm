@@ -1,7 +1,7 @@
 import ytdl from "@distube/ytdl-core"
 import { consola } from "consola"
 import { createWriteStream } from "node:fs"
-import { access } from "node:fs/promises"
+import { access, mkdir } from "node:fs/promises"
 import { join } from "node:path"
 
 import { CacheManager } from "./cache-manager"
@@ -48,6 +48,9 @@ export async function downloadVideo({
   const outputDir = join(PATHS.CACHE_DIR, "videos")
   const outputPath = join(outputDir, `${btoa(cacheKey)}.mp4`)
   consola.debug(`Using cache directory: ${outputDir}`)
+
+  // Ensure output directory exists
+  await mkdir(outputDir, { recursive: true })
 
   const stream = ytdl(url, {
     quality: musicOnly ? "highestaudio" : "highest",
