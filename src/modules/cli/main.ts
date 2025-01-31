@@ -19,11 +19,6 @@ const cli = defineCommand({
     start,
     prune,
   },
-  cleanup: async () => {
-    consola.info("Cleaning up temporary files...")
-    await fileManager.deleteAllFiles()
-    consola.success("Cleanup completed")
-  },
 })
 
 export const runCLI = () => runMain(cli)

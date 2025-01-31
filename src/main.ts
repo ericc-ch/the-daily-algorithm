@@ -1,6 +1,7 @@
 import { consola } from "consola"
 
 import { ensureDirectories } from "~/lib/paths"
+import { fileManager } from "~/modules/script-generator/lib/file-manager"
 
 import { initializeDB } from "./database/main"
 import { runCLI } from "./modules/cli/main"
@@ -14,6 +15,16 @@ async function initialize() {
   initializeDB()
   consola.success("Database initialized successfully")
 }
+
+async function cleanup() {
+  consola.info("Cleaning up temporary files...")
+  await fileManager.deleteAllFiles()
+  consola.success("Cleanup completed")
+}
+
+// Setup cleanup on process exit
+process.on("SIGINT", cleanup)
+process.on("SIGTERM", cleanup)
 
 async function main() {
   await initialize()
