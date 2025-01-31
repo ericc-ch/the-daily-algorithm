@@ -1,7 +1,4 @@
 import { defineCommand, runMain } from "citty"
-import { consola } from "consola"
-
-import { fileManager } from "~/modules/script-generator/lib/file-manager"
 
 import { auth } from "./commands/auth"
 import { generate } from "./commands/generate"
