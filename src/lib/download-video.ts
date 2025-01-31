@@ -1,5 +1,6 @@
+import ytdl from "@distube/ytdl-core"
 import { consola } from "consola"
-import spawn from "nano-spawn"
+import { createWriteStream } from "node:fs"
 import { access } from "node:fs/promises"
 import { join } from "node:path"
 
@@ -45,37 +46,29 @@ export async function downloadVideo({
 
   consola.info(`Downloading video from: ${url}`)
   const outputDir = join(PATHS.CACHE_DIR, "videos")
+  const outputPath = join(outputDir, `${btoa(cacheKey)}.mp4`)
   consola.debug(`Using cache directory: ${outputDir}`)
 
-  const { output } = await spawn("yt-dlp", [
-    // Specify the directory to save the downloaded files
-    "--paths",
-    outputDir,
+  const stream = ytdl(url, {
+    quality: musicOnly ? "highestaudio" : "highest",
+    filter: musicOnly ? "audioonly" : "audioandvideo",
+  })
 
-    // Set the output filename template - use deterministic name based on URL
-    "--output",
-    // Use URL hash and music flag for filename, %(ext)s is replaced with file extension
-    `${btoa(cacheKey)}.%(ext)s`,
+  // Create a write stream to save the video
+  const writeStream = createWriteStream(outputPath)
 
-    // Download in MP4 format
-    "--format",
-    "mp4",
+  // Return a promise that resolves when the download is complete
+  return new Promise((resolve, reject) => {
+    stream.pipe(writeStream)
 
-    // If withMusic is true, add -x flag
-    ...(musicOnly ?
-      // -x extracts audio from video
-      ["-x"]
-    : []),
+    stream.on("error", (error) => {
+      reject(error)
+    })
 
-    // The video URL to download
-    url,
-  ])
-
-  const downloadLine = output.split("[download]").map((line) => line.trim())[1]
-  const location = downloadLine.split("Destination: ")[1]
-
-  consola.success(`Video downloaded successfully to: ${location}`)
-  await videoCache.set(cacheKey, JSON.stringify({ path: location }))
-
-  return location
+    writeStream.on("finish", async () => {
+      consola.success(`Video downloaded successfully to: ${outputPath}`)
+      await videoCache.set(cacheKey, JSON.stringify({ path: outputPath }))
+      resolve(outputPath)
+    })
+  })
 }

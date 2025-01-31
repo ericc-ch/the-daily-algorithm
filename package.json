@@ -12,6 +12,7 @@
     "studio": "remotionb studio"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^4.16.0",
     "@echristian/edge-tts": "^0.0.11",
     "@echristian/env": "^0.0.6",
     "@google/generative-ai": "^0.21.0",
