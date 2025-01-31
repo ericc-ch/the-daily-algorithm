@@ -7,6 +7,8 @@ import { initializeDB } from "./database/main"
 import { runCLI } from "./modules/cli/main"
 
 async function initialize() {
+  consola.level = 4
+
   consola.info("Ensuring required directories exist...")
   await ensureDirectories()
   consola.success("Directories created successfully")

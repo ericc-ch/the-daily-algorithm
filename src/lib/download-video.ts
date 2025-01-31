@@ -60,15 +60,50 @@ export async function downloadVideo({
   // Return a promise that resolves when the download is complete
   return new Promise((resolve, reject) => {
     stream.pipe(writeStream)
+    let progressTimeout: Timer
+    let hasEnded = false
 
-    stream.on("error", (error) => {
-      reject(error)
-    })
-
-    writeStream.on("finish", async () => {
+    const endDownload = async () => {
+      if (hasEnded) return
+      hasEnded = true
+      clearTimeout(progressTimeout)
+      writeStream.end()
       consola.success(`Video downloaded successfully to: ${outputPath}`)
       await videoCache.set(cacheKey, JSON.stringify({ path: outputPath }))
       resolve(outputPath)
+    }
+
+    const resetProgressTimeout = () => {
+      clearTimeout(progressTimeout)
+      progressTimeout = setTimeout(() => {
+        consola.warn("No progress for 5 seconds, ending download...")
+        void endDownload()
+      }, 5000)
+    }
+
+    // Start initial timeout
+    resetProgressTimeout()
+
+    stream.on("progress", (_, downloaded, total) => {
+      const percent = (downloaded / total) * 100
+      consola.debug(
+        `Download progress: ${percent.toFixed(2)}% (${downloaded}/${total})`,
+      )
+      resetProgressTimeout() // Reset timeout on progress
     })
+
+    stream.on("error", (error) => {
+      clearTimeout(progressTimeout)
+      writeStream.destroy()
+      reject(error)
+    })
+
+    writeStream.on("error", (error) => {
+      clearTimeout(progressTimeout)
+      stream.destroy()
+      reject(error)
+    })
+
+    stream.on("end", endDownload)
   })
 }
