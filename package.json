@@ -27,7 +27,7 @@
     "citty": "^0.1.6",
     "consola": "^3.4.0",
     "cron": "^3.5.0",
-    "drizzle-orm": "^0.38.4",
+    "drizzle-orm": "^0.39.1",
     "googleapis": "^144.0.0",
     "hono": "^4.6.20",
     "nano-spawn": "^0.2.0",
